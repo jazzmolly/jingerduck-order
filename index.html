@@ -54,17 +54,18 @@
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
-      width: 100%;
-      height: 38px;
+      /* 縮小寬度避免超出畫面 */
+      width: 72px;
+      height: 36px;
       background: white;
       border: 1px solid #ddd;
       border-radius: 6px;
-      padding: 0 4px;
+      padding: 0 2px;
     }
     
     .qty-btn {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       border: none;
       border-radius: 4px;
       background: #f5f5f5;
@@ -77,6 +78,7 @@
       justify-content: center;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+      flex-shrink: 0; /* 防止按鈕被壓縮 */
     }
     
     .qty-btn:hover {
@@ -94,14 +96,16 @@
     }
     
     .qty-value {
-      min-width: 28px;
+      min-width: 20px; /* 縮小最小寬度 */
+      width: 20px; /* 固定寬度 */
       text-align: center;
       font-size: 14px;
       font-weight: 500;
       color: #333;
       border: none;
       background: transparent;
-      padding: 0 4px;
+      padding: 0 2px;
+      flex-shrink: 0; /* 防止數字框被壓縮 */
     }
     
     .qty-value:focus {
@@ -138,7 +142,7 @@
     
     /* 手機版樣式 */
     @media (max-width: 768px) {
-      .menu-grid{grid-template-columns: 1fr 85px 90px;}
+      .menu-grid{grid-template-columns: 1fr 75px 75px;} /* 縮小欄位寬度 */
       
       /* 手機版隱藏原生輸入框，顯示自訂按鈕 */
       .qty-desktop {
@@ -150,31 +154,71 @@
       }
       
       .qty-container {
-        width: 80px;
+        width: 75px; /* 調整容器寬度 */
       }
       
       .qty-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 18px;
+        width: 24px; /* 略微縮小按鈕 */
+        height: 24px;
+        font-size: 14px; /* 調整字體大小 */
       }
       
       .qty-value {
-        min-width: 32px;
-        font-size: 16px;
+        min-width: 18px;
+        width: 18px; /* 進一步縮小數字框 */
+        font-size: 13px;
       }
     }
     
     /* 小尺寸手機優化 */
     @media (max-width: 480px) {
+      .menu-grid{grid-template-columns: 1fr 70px 70px;} /* 更小的欄位 */
+      
       .qty-container {
-        width: 75px;
+        width: 70px;
+      }
+      
+      .qty-mobile {
+        width: 68px; /* 更緊湊的寬度 */
+        height: 34px;
+        padding: 0 1px;
       }
       
       .qty-btn {
-        width: 30px;
-        height: 30px;
-        font-size: 16px;
+        width: 22px;
+        height: 22px;
+        font-size: 13px;
+      }
+      
+      .qty-value {
+        min-width: 16px;
+        width: 16px;
+        font-size: 12px;
+      }
+    }
+    
+    /* 超小螢幕優化 */
+    @media (max-width: 360px) {
+      .menu-grid{grid-template-columns: 1fr 65px 65px;}
+      
+      .qty-container {
+        width: 65px;
+      }
+      
+      .qty-mobile {
+        width: 63px;
+      }
+      
+      .qty-btn {
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+      }
+      
+      .qty-value {
+        min-width: 15px;
+        width: 15px;
+        font-size: 11px;
       }
     }
   </style>
@@ -182,7 +226,7 @@
 <body>
   <div class="container" role="main">
     <header>
-      <h1>薑薑 薑母鴨 — 線上點餐test2</h1>
+      <h1>薑薑 鴨肉小館-九珍薑母鴨 — 線上點餐</h1>
     </header>
 
     <section aria-labelledby="menu-title">
@@ -584,5 +628,3 @@
   </script>
 </body>
 </html>
-
-
