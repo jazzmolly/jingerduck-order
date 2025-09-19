@@ -54,7 +54,7 @@
       font-size: 0.95rem;
     }
     
-    /* 菜單表格 */
+    /* 菜單表格 - 改用傳統表格結構 */
     .menu-section {
       margin-bottom: 25px;
     }
@@ -66,32 +66,41 @@
       font-weight: 600;
     }
     
-    .menu-grid {
-      display: grid;
-      grid-template-columns: 1fr 80px 70px;
-      gap: 12px;
-      align-items: center;
+    .menu-table {
+      width: 100%;
+      border-collapse: collapse;
       border: 1px solid #e0e0e0;
       border-radius: var(--border-radius);
       overflow: hidden;
+      background: white;
     }
     
     .menu-header {
       background: var(--brand);
       color: white;
       padding: 12px 8px;
-      text-align: center;
+      text-align: left;
       font-weight: 600;
       font-size: 0.9rem;
     }
     
-    .menu-item {
-      padding: 12px 8px;
+    .menu-header:nth-child(2) { text-align: right; }
+    .menu-header:nth-child(3) { text-align: center; }
+    
+    .menu-row {
       border-bottom: 1px solid #f0f0f0;
-      display: contents;
     }
     
-    .item-name {
+    .menu-row:last-child {
+      border-bottom: none;
+    }
+    
+    .item-cell {
+      padding: 12px 8px;
+      vertical-align: middle;
+    }
+    
+    .item-name-cell {
       padding-left: 12px;
       font-size: 0.95rem;
     }
@@ -100,16 +109,24 @@
       margin-right: 8px;
       transform: scale(1.1);
       accent-color: var(--brand);
+      vertical-align: middle;
     }
     
-    .item-price {
+    .item-name-text {
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1.4;
+    }
+    
+    .item-price-cell {
       text-align: right;
       color: var(--muted);
       font-weight: 500;
     }
     
-    .item-qty {
+    .item-qty-cell {
       text-align: center;
+      padding: 4px;
     }
     
     /* 數量控制器 */
@@ -120,12 +137,13 @@
       border: 1px solid #ddd;
       border-radius: 6px;
       overflow: hidden;
-      min-width: 60px;
+      min-width: 70px;
+      background: white;
     }
     
     .qty-input {
-      width: 100%;
-      padding: 6px;
+      width: 35px;
+      padding: 6px 2px;
       border: none;
       text-align: center;
       font-size: 14px;
@@ -171,12 +189,22 @@
       opacity: 0.5;
       cursor: not-allowed;
       color: #ccc;
+      background: #f8f8f8;
     }
     
-    .qty-disabled {
+    .qty-container.disabled {
+      background: #f8f8f8 !important;
+      border-color: #e0e0e0 !important;
+    }
+    
+    .qty-container.disabled .qty-input {
       background: #f8f8f8 !important;
       color: #999 !important;
-      border-color: #e0e0e0 !important;
+    }
+    
+    .qty-container.disabled .qty-btn {
+      background: #f0f0f0 !important;
+      color: #ccc !important;
     }
     
     /* 總計區域 */
@@ -186,13 +214,15 @@
       border-radius: var(--border-radius);
       margin: 20px 0;
       border: 1px solid #e8e8e8;
-    }
-    
-    .total-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+    }
+    
+    .total-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
     
     .total-label {
@@ -215,6 +245,7 @@
       cursor: pointer;
       font-size: 0.9rem;
       transition: background 0.2s;
+      white-space: nowrap;
     }
     
     .clear-btn:hover {
@@ -238,7 +269,7 @@
     
     .form-grid {
       display: grid;
-      gap: 12px;
+      gap: 16px;
       margin-bottom: 15px;
     }
     
@@ -279,7 +310,7 @@
     
     .datetime-container {
       display: flex;
-      gap: 8px;
+      gap: 12px;
       align-items: end;
     }
     
@@ -309,6 +340,7 @@
       cursor: pointer;
       transition: all 0.2s;
       box-shadow: 0 2px 8px rgba(178, 34, 34, 0.2);
+      white-space: nowrap;
     }
     
     .confirm-btn:hover:not(:disabled) {
@@ -343,15 +375,21 @@
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
-      margin: 15px 8px;
+      margin: 8px;
       transition: all 0.2s;
       text-decoration: none;
       display: inline-block;
+      white-space: nowrap;
     }
     
     .share-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .share-btn.danger {
+      background: var(--danger);
+      color: white;
     }
     
     .order-summary {
@@ -360,9 +398,12 @@
       border-radius: 6px;
       border-left: 4px solid var(--success);
       margin: 15px 0;
-      font-family: monospace;
+      font-family: "Courier New", monospace;
       white-space: pre-wrap;
       font-size: 0.9rem;
+      color: #333;
+      max-height: 300px;
+      overflow-y: auto;
     }
     
     /* 響應式設計 */
@@ -370,22 +411,32 @@
       body { padding: 10px; }
       .container { padding: 15px; }
       
-      .menu-grid {
-        grid-template-columns: 1fr 70px 65px;
-        gap: 8px;
+      .menu-table {
+        font-size: 0.9rem;
       }
       
-      .item-name {
+      .item-name-cell {
         padding-left: 8px;
         font-size: 0.9rem;
       }
       
-      .menu-item { padding: 10px 6px; }
+      .item-cell {
+        padding: 10px 6px;
+      }
+      
+      .qty-container {
+        min-width: 65px;
+      }
       
       .qty-btn {
         width: 26px;
         height: 26px;
         font-size: 15px;
+      }
+      
+      .qty-input {
+        width: 32px;
+        font-size: 14px;
       }
       
       .form-grid {
@@ -399,17 +450,20 @@
         align-items: stretch;
       }
       
+      .total-section {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+      }
+      
       h1 { font-size: 1.4rem; }
     }
     
     @media (max-width: 480px) {
-      .menu-grid {
-        grid-template-columns: 1fr 65px 60px;
-        gap: 6px;
-      }
-      
-      .item-name { font-size: 0.85rem; }
+      .item-name-cell { font-size: 0.85rem; }
+      .qty-container { min-width: 60px; }
       .qty-btn { width: 24px; height: 24px; font-size: 14px; }
+      .qty-input { width: 28px; font-size: 13px; }
     }
   </style>
 </head>
@@ -423,25 +477,27 @@
     <!-- 菜單選擇區 -->
     <section class="menu-section">
       <h2 class="menu-title">🍲 請選擇想要的品項</h2>
-      <div class="menu-grid" id="menuGrid">
-        <!-- 表頭 -->
-        <div class="menu-header">品名</div>
-        <div class="menu-header">單價</div>
-        <div class="menu-header">數量</div>
-        
-        <!-- 菜單項目將由 JavaScript 插入 -->
-      </div>
+      <table class="menu-table" id="menuTable">
+        <thead>
+          <tr>
+            <th class="menu-header">品名</th>
+            <th class="menu-header">單價</th>
+            <th class="menu-header">數量</th>
+          </tr>
+        </thead>
+        <tbody id="menuBody">
+          <!-- 菜單項目將由 JavaScript 插入 -->
+        </tbody>
+      </table>
     </section>
 
     <!-- 總計區域 -->
     <section class="total-section">
-      <div class="total-row">
-        <div>
-          <div class="total-label">目前訂購金額</div>
-          <div class="total-amount" id="totalAmount">NT$0</div>
-        </div>
-        <button class="clear-btn" id="clearOrder">🗑️ 清除選單</button>
+      <div class="total-info">
+        <div class="total-label">目前訂購金額</div>
+        <div class="total-amount" id="totalAmount">NT$0</div>
       </div>
+      <button class="clear-btn" id="clearOrder">🗑️ 清除選單</button>
     </section>
 
     <!-- 取餐資訊 -->
@@ -458,14 +514,15 @@
           <input type="tel" id="customerPhone" class="form-input" placeholder="09xx-xxx-xxx" pattern="09[0-9]{2}-?[0-9]{3}-?[0-9]{3}" required>
         </div>
         
-        <div class="form-group">
-          <label class="form-label required" for="pickupDate">取餐日期</label>
-          <input type="date" id="pickupDate" class="form-input" required>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label required" for="pickupTime">取餐時間 <span class="time-note">(營業時間 10:00-18:00)</span></label>
-          <input type="time" id="pickupTime" class="form-input" min="10:00" max="18:00" required>
+        <div class="form-group datetime-container">
+          <div style="flex: 1;">
+            <label class="form-label required" for="pickupDate">取餐日期</label>
+            <input type="date" id="pickupDate" class="form-input" required>
+          </div>
+          <div style="flex: 1;">
+            <label class="form-label required" for="pickupTime">取餐時間 <span class="time-note">(營業時間 10:00-18:00)</span></label>
+            <input type="time" id="pickupTime" class="form-input" min="10:00" max="18:00" required>
+          </div>
         </div>
         
         <div class="form-group">
@@ -484,7 +541,7 @@
         <div id="orderPreview" class="order-summary"></div>
         <a href="#" id="shareToLine" class="share-btn">📱 分享到 LINE</a>
         <button id="copyOrder" class="share-btn">📋 複製訂單</button>
-        <button id="backToMenu" class="share-btn" style="background: var(--danger); color: white;">🔄 返回選單</button>
+        <button id="backToMenu" class="share-btn danger">🔄 返回選單</button>
       </div>
     </section>
 
@@ -532,58 +589,64 @@
 
     // ===== 初始化 =====
     document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM 載入完成，開始初始化...');
       initMenu();
       initDateTime();
       initEventListeners();
       calculateTotal();
+      console.log('初始化完成！');
     });
 
     // ===== 初始化菜單 =====
     function initMenu() {
-      const menuGrid = document.getElementById('menuGrid');
+      console.log('開始生成菜單...');
+      const menuBody = document.getElementById('menuBody');
+      menuBody.innerHTML = ''; // 清空現有內容
       
-      // 移除現有菜單項目（保留表頭）
-      const existingItems = menuGrid.querySelectorAll('.menu-item');
-      existingItems.forEach(item => item.remove());
-      
-      // 插入新菜單項目
       menuData.forEach((item, index) => {
         const itemId = `item-${index}`;
         const qtyId = `qty-${index}`;
         
-        // 品名列
-        const nameCell = document.createElement('div');
-        nameCell.className = 'menu-item item-name';
+        // 建立表格行
+        const row = document.createElement('tr');
+        row.className = 'menu-row';
+        
+        // 品名單元格
+        const nameCell = document.createElement('td');
+        nameCell.className = 'item-cell item-name-cell';
         nameCell.innerHTML = `
           <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; width: 100%;">
             <input type="checkbox" class="item-checkbox" id="${itemId}" data-price="${item.price}" data-name="${item.name}">
-            <span style="flex: 1; font-size: 0.9rem; line-height: 1.4;">${item.name}</span>
+            <span class="item-name-text">${item.name}</span>
           </label>
         `;
         
-        // 價格列
-        const priceCell = document.createElement('div');
-        priceCell.className = 'menu-item item-price';
+        // 價格單元格
+        const priceCell = document.createElement('td');
+        priceCell.className = 'item-cell item-price-cell';
         priceCell.textContent = `NT$${item.price}`;
         
-        // 數量列
-        const qtyCell = document.createElement('div');
-        qtyCell.className = 'menu-item item-qty';
+        // 數量單元格
+        const qtyCell = document.createElement('td');
+        qtyCell.className = 'item-cell item-qty-cell';
         qtyCell.innerHTML = `
-          <div class="qty-container qty-disabled" data-qty-id="${qtyId}">
+          <div class="qty-container disabled" data-qty-id="${qtyId}">
             <button type="button" class="qty-btn" id="minus-${index}" disabled>-</button>
             <input type="text" class="qty-input" id="${qtyId}" value="0" readonly>
             <button type="button" class="qty-btn" id="plus-${index}" disabled>+</button>
           </div>
         `;
         
-        menuGrid.appendChild(nameCell);
-        menuGrid.appendChild(priceCell);
-        menuGrid.appendChild(qtyCell);
+        row.appendChild(nameCell);
+        row.appendChild(priceCell);
+        row.appendChild(qtyCell);
+        menuBody.appendChild(row);
         
         // 綁定事件
         bindItemEvents(index, itemId, qtyId);
       });
+      
+      console.log(`菜單生成完成，共 ${menuData.length} 項`);
     }
 
     // ===== 綁定菜單項目事件 =====
@@ -600,15 +663,19 @@
         const currentQty = parseInt(qtyInput.value) || 0;
         
         // 更新數量控制器狀態
-        qtyContainer.classList.toggle('qty-disabled', !isChecked);
-        minusBtn.disabled = !isChecked;
-        plusBtn.disabled = !isChecked;
-        qtyInput.readOnly = !isChecked;
-        
-        // 如果勾選但數量為0，設為1
-        if (isChecked && currentQty === 0) {
-          qtyInput.value = 1;
-        } else if (!isChecked) {
+        if (isChecked) {
+          qtyContainer.classList.remove('disabled');
+          minusBtn.disabled = false;
+          plusBtn.disabled = false;
+          qtyInput.readOnly = false;
+          if (currentQty === 0) {
+            qtyInput.value = 1;
+          }
+        } else {
+          qtyContainer.classList.add('disabled');
+          minusBtn.disabled = true;
+          plusBtn.disabled = true;
+          qtyInput.readOnly = true;
           qtyInput.value = 0;
         }
         
@@ -620,15 +687,16 @@
       minusBtn.addEventListener('click', function() {
         if (!this.disabled) {
           let current = parseInt(qtyInput.value) || 0;
-          if (current > 0) {
+          if (current > 1) {
             qtyInput.value = current - 1;
-            if (qtyInput.value === '0') {
-              checkbox.checked = false;
-              qtyContainer.classList.add('qty-disabled');
-              minusBtn.disabled = true;
-              plusBtn.disabled = true;
-              qtyInput.readOnly = true;
-            }
+            calculateTotal();
+          } else if (current === 1) {
+            qtyInput.value = 0;
+            checkbox.checked = false;
+            qtyContainer.classList.add('disabled');
+            minusBtn.disabled = true;
+            plusBtn.disabled = true;
+            qtyInput.readOnly = true;
             calculateTotal();
           }
         }
@@ -638,7 +706,7 @@
         if (!this.disabled) {
           let current = parseInt(qtyInput.value) || 0;
           qtyInput.value = current + 1;
-          checkbox.checked = true; // 確保勾選狀態
+          checkbox.checked = true;
           calculateTotal();
         }
       });
@@ -648,13 +716,19 @@
         let value = parseInt(e.target.value);
         if (isNaN(value) || value < 0) {
           e.target.value = 0;
-        }
-        if (value > 0) {
-          checkbox.checked = true;
-          qtyContainer.classList.remove('qty-disabled');
-          minusBtn.disabled = false;
-          plusBtn.disabled = false;
-          qtyInput.readOnly = false;
+          checkbox.checked = false;
+          qtyContainer.classList.add('disabled');
+          minusBtn.disabled = true;
+          plusBtn.disabled = true;
+          this.readOnly = true;
+        } else {
+          checkbox.checked = value > 0;
+          if (value > 0) {
+            qtyContainer.classList.remove('disabled');
+            minusBtn.disabled = false;
+            plusBtn.disabled = false;
+            this.readOnly = false;
+          }
         }
         calculateTotal();
       });
@@ -722,7 +796,7 @@
         const checkbox = document.getElementById(`item-${index}`);
         const qtyInput = document.getElementById(`qty-${index}`);
         
-        if (checkbox.checked) {
+        if (checkbox && checkbox.checked) {
           const qty = parseInt(qtyInput.value) || 0;
           const subtotal = item.price * qty;
           total += subtotal;
@@ -754,8 +828,10 @@
       
       if (hasItems && isFormValid) {
         confirmBtn.style.background = var(--brand);
+        confirmBtn.style.cursor = 'pointer';
       } else {
         confirmBtn.style.background = '#ccc';
+        confirmBtn.style.cursor = 'not-allowed';
       }
     }
 
@@ -793,12 +869,12 @@
           const minusBtn = document.getElementById(`minus-${index}`);
           const plusBtn = document.getElementById(`plus-${index}`);
           
-          checkbox.checked = false;
-          qtyInput.value = '0';
-          qtyContainer.classList.add('qty-disabled');
-          minusBtn.disabled = true;
-          plusBtn.disabled = true;
-          qtyInput.readOnly = true;
+          if (checkbox) checkbox.checked = false;
+          if (qtyInput) qtyInput.value = '0';
+          if (qtyContainer) qtyContainer.classList.add('disabled');
+          if (minusBtn) minusBtn.disabled = true;
+          if (plusBtn) plusBtn.disabled = true;
+          if (qtyInput) qtyInput.readOnly = true;
         });
         
         // 重置表單
@@ -933,6 +1009,8 @@ ${itemsText}
         // Fallback for older browsers
         const textArea = document.createElement('textarea');
         textArea.value = orderPreview;
+        textArea.style.position = 'fixed';
+        textArea.style.opacity = '0';
         document.body.appendChild(textArea);
         textArea.select();
         document.execCommand('copy');
