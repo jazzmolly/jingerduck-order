@@ -22,51 +22,105 @@
     .item-price{padding:10px 8px; text-align:right; color:var(--muted); border-bottom:1px dashed #eee;}
     .item-action{padding:10px 8px; text-align:right; border-bottom:1px dashed #eee;}
     
-    /* 數量輸入框樣式 - 確保箭頭顯示 */
-    .qty {
-      width:64px; 
-      padding:6px; 
-      border-radius:6px; 
-      border:1px solid #ddd; 
-      text-align:center;
-      /* 確保顯示上下箭頭 */
-      -webkit-appearance: auto !important;
-      -moz-appearance: number-input !important;
-      appearance: auto !important;
-      /* 移除 iOS 的自訂樣式 */
-      -webkit-appearance: auto;
-      /* 確保在 Webkit 瀏覽器中顯示箭頭 */
-      -webkit-user-select: auto;
-      /* 設定最小高度確保箭頭有足夠空間 */
-      min-height: 34px;
-      /* 確保輸入框可點擊 */
-      pointer-events: auto;
-      /* 移除任何可能隱藏箭頭的樣式 */
+    /* 數量控制器的通用樣式 */
+    .qty-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      position: relative;
+    }
+    
+    /* 電腦版：使用原生數量輸入框 */
+    .qty-desktop {
+      width: 100%;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      text-align: center;
+      font-size: 14px;
       background: white;
       color: #333;
+      /* 確保電腦版顯示箭頭 */
+      -webkit-appearance: auto;
+      -moz-appearance: number-input;
+      appearance: auto;
+      min-height: 34px;
+    }
+    
+    /* 手機版：自訂加減按鈕 */
+    .qty-mobile {
+      display: none;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 38px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 0 4px;
+    }
+    
+    .qty-btn {
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 4px;
+      background: #f5f5f5;
+      color: #666;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .qty-btn:hover {
+      background: #e8e8e8;
+    }
+    
+    .qty-btn:active {
+      background: #ddd;
+      transform: scale(0.95);
+    }
+    
+    .qty-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    
+    .qty-value {
+      min-width: 28px;
+      text-align: center;
       font-size: 14px;
-      font-family: inherit;
+      font-weight: 500;
+      color: #333;
+      border: none;
+      background: transparent;
+      padding: 0 4px;
     }
     
-    /* 為 iOS 設備添加額外樣式 */
-    @supports (-webkit-touch-callout: none) {
-      .qty {
-        padding: 8px 6px 8px 6px; /* 為 iOS 增加內邊距 */
-        min-height: 40px;
-        /* 強制顯示箭頭 */
-        -webkit-appearance: number-field !important;
-      }
+    .qty-value:focus {
+      outline: none;
+      background: #f9f9f9;
     }
     
-    /* 確保在所有瀏覽器中箭頭可見 */
-    .qty::-webkit-outer-spin-button,
-    .qty::-webkit-inner-spin-button {
-      -webkit-appearance: inner-spin-button !important;
-      opacity: 1;
+    /* 禁用狀態 */
+    .qty-container.disabled .qty-desktop,
+    .qty-container.disabled .qty-mobile {
+      background: #f8f8f8;
+      color: #999;
+      border-color: #e0e0e0;
     }
     
-    .qty[type="number"] {
-      -moz-appearance: textfield; /* Firefox */
+    .qty-container.disabled .qty-btn {
+      background: #f0f0f0;
+      color: #ccc;
+      cursor: not-allowed;
     }
     
     .total-box{display:flex; justify-content:space-between; align-items:center; margin-top:14px; padding:12px; background:var(--card-bg); border-radius:8px;}
@@ -82,20 +136,45 @@
     .summary{white-space:pre-wrap; font-family:monospace; background:#fff; padding:8px; border-radius:6px; border:1px solid #eee; margin-top:10px;}
     footer{margin-top:18px; color:#888; font-size:0.9rem;}
     
-    @media (max-width:720px){
+    /* 手機版樣式 */
+    @media (max-width: 768px) {
       .menu-grid{grid-template-columns: 1fr 85px 90px;}
-      .qty{
-        width:54px;
-        min-height: 36px;
+      
+      /* 手機版隱藏原生輸入框，顯示自訂按鈕 */
+      .qty-desktop {
+        display: none;
+      }
+      
+      .qty-mobile {
+        display: flex;
+      }
+      
+      .qty-container {
+        width: 80px;
+      }
+      
+      .qty-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+      }
+      
+      .qty-value {
+        min-width: 32px;
+        font-size: 16px;
       }
     }
     
-    /* 額外的手機版優化 */
+    /* 小尺寸手機優化 */
     @media (max-width: 480px) {
-      .qty {
-        width: 50px;
-        min-height: 38px;
-        font-size: 16px; /* 增加字體大小讓箭頭更容易點擊 */
+      .qty-container {
+        width: 75px;
+      }
+      
+      .qty-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
       }
     }
   </style>
@@ -186,6 +265,11 @@
   </div>
 
   <script>
+    // 檢測是否為手機設備
+    function isMobile() {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    }
+
     // ----- 菜單資料 -----
     const menuData = [
       { name: "薑母鴨（小, 6塊肉+1000g 湯底）", price: 250 },
@@ -223,6 +307,7 @@
 
     // ----- 插入菜單到 DOM -----
     const menuEl = document.getElementById('menu');
+    const isMobileDevice = isMobile();
 
     menuData.forEach((it, idx) => {
       // 品名
@@ -241,11 +326,30 @@
       priceDiv.className = 'item-price';
       priceDiv.textContent = it.price;
 
-      // 數量
+      // 數量容器
       const actionDiv = document.createElement('div');
       actionDiv.className = 'item-action';
       const qtyId = `qty-${idx}`;
-      actionDiv.innerHTML = `<input type="number" id="${qtyId}" class="qty" value="1" min="1" step="1" disabled aria-label="數量">`;
+      
+      if (isMobileDevice) {
+        // 手機版：加減按鈕
+        actionDiv.innerHTML = `
+          <div class="qty-container disabled" id="qty-container-${idx}">
+            <div class="qty-mobile">
+              <button type="button" class="qty-btn" id="minus-${idx}" disabled>-</button>
+              <input type="text" class="qty-value" id="${qtyId}" value="1" readonly aria-label="數量">
+              <button type="button" class="qty-btn" id="plus-${idx}" disabled>+</button>
+            </div>
+          </div>
+        `;
+      } else {
+        // 電腦版：原生數量輸入框
+        actionDiv.innerHTML = `
+          <div class="qty-container">
+            <input type="number" id="${qtyId}" class="qty-desktop" value="1" min="1" step="1" disabled aria-label="數量">
+          </div>
+        `;
+      }
 
       menuEl.appendChild(nameDiv);
       menuEl.appendChild(priceDiv);
@@ -253,31 +357,82 @@
 
       // 事件綁定
       const cb = nameDiv.querySelector('input[type="checkbox"]');
-      const qty = actionDiv.querySelector('input[type="number"]');
+      let qtyElement;
 
-      cb.addEventListener('change', () => {
-        qty.disabled = !cb.checked;
-        if (cb.checked && (!qty.value || qty.value < 1)) qty.value = 1;
-        // 當啟用時，強制更新以確保箭頭顯示
-        if (cb.checked) {
-          qty.focus();
-          qty.blur(); // 觸發樣式更新
-        }
-        calculateTotal();
-      });
+      if (isMobileDevice) {
+        const container = document.getElementById(`qty-container-${idx}`);
+        const minusBtn = document.getElementById(`minus-${idx}`);
+        const plusBtn = document.getElementById(`plus-${idx}`);
+        qtyElement = document.getElementById(qtyId);
 
-      qty.addEventListener('input', () => {
-        if (!qty.value || parseInt(qty.value) < 1) qty.value = 1;
-        calculateTotal();
-      });
+        // 點擊 checkbox 時切換數量控制器的啟用狀態
+        cb.addEventListener('change', () => {
+          const isEnabled = cb.checked;
+          container.classList.toggle('disabled', !isEnabled);
+          minusBtn.disabled = !isEnabled;
+          plusBtn.disabled = !isEnabled;
+          qtyElement.readOnly = !isEnabled;
+          
+          if (isEnabled && (!qtyElement.value || parseInt(qtyElement.value) < 1)) {
+            qtyElement.value = 1;
+          }
+          calculateTotal();
+        });
 
-      // 添加點擊事件，讓使用者更容易點擊箭頭
-      qty.addEventListener('click', (e) => {
-        if (!qty.disabled) {
-          // 確保輸入框獲得焦點
-          e.target.focus();
-        }
-      });
+        // 加減按鈕事件
+        minusBtn.addEventListener('click', () => {
+          if (!minusBtn.disabled) {
+            let current = parseInt(qtyElement.value) || 1;
+            if (current > 1) {
+              qtyElement.value = current - 1;
+              calculateTotal();
+            }
+          }
+        });
+
+        plusBtn.addEventListener('click', () => {
+          if (!plusBtn.disabled) {
+            let current = parseInt(qtyElement.value) || 1;
+            qtyElement.value = current + 1;
+            calculateTotal();
+          }
+        });
+
+        // 手動輸入驗證
+        qtyElement.addEventListener('input', (e) => {
+          let value = parseInt(e.target.value);
+          if (isNaN(value) || value < 1) {
+            e.target.value = 1;
+          }
+          calculateTotal();
+        });
+
+        // 防止長按數字鍵盤
+        qtyElement.addEventListener('focus', () => {
+          setTimeout(() => {
+            qtyElement.blur();
+          }, 100);
+        });
+
+      } else {
+        // 電腦版事件
+        qtyElement = document.getElementById(qtyId);
+        
+        cb.addEventListener('change', () => {
+          qtyElement.disabled = !cb.checked;
+          if (cb.checked && (!qtyElement.value || parseInt(qtyElement.value) < 1)) {
+            qtyElement.value = 1;
+          }
+          calculateTotal();
+        });
+
+        qtyElement.addEventListener('input', () => {
+          if (!qtyElement.value || parseInt(qtyElement.value) < 1) {
+            qtyElement.value = 1;
+          }
+          calculateTotal();
+        });
+      }
     });
 
     // ----- 計算總金額 & 建議尾數 -----
@@ -294,21 +449,18 @@
       });
       document.getElementById('total').textContent = "NT$" + total;
 
-      // 產生建議尾數（2至3位數），方便對單。例如：在總額後加入尾數(例如 +27)
-      // 我們用總額與時間混合產生一組短尾數，顧客付款時請把尾數放在備註或轉帳末尾。
+      // 產生建議尾數（2至3位數），方便對單
       const tail = generateTail(total);
       document.getElementById('tail').textContent = tail ? ("+" + tail) : "—";
       document.getElementById('showTail').textContent = "尾數 · " + (tail ? ("+" + tail) : "—");
     }
 
-    // 產生尾數：基於金額與時間雜湊得到 2~3 位數 (避免重複機率低)
+    // 產生尾數：基於金額與時間雜湊得到 2~3 位數
     function generateTail(total) {
       if (!total || total <= 0) return null;
       const now = Date.now();
-      // 簡單 hash：取 total + timestamp 的字串最後 3 位
       const str = String(total) + String(now);
-      const tail = str.slice(-3); // 3 位
-      // 若尾數以 0 開頭，也接受（顧客可直接輸入）
+      const tail = str.slice(-3);
       return tail;
     }
 
@@ -318,7 +470,22 @@
         const cb = document.getElementById(`cb-${idx}`);
         const qty = document.getElementById(`qty-${idx}`);
         if (cb) cb.checked = false;
-        if (qty) { qty.value = 1; qty.disabled = true; }
+        
+        if (isMobileDevice) {
+          const container = document.getElementById(`qty-container-${idx}`);
+          const minusBtn = document.getElementById(`minus-${idx}`);
+          const plusBtn = document.getElementById(`plus-${idx}`);
+          if (qty) qty.value = 1;
+          if (container) container.classList.add('disabled');
+          if (minusBtn) minusBtn.disabled = true;
+          if (plusBtn) plusBtn.disabled = true;
+          if (qty) qty.readOnly = true;
+        } else {
+          if (qty) { 
+            qty.value = 1; 
+            qty.disabled = true; 
+          }
+        }
       });
       calculateTotal();
       hidePaymentArea();
@@ -331,10 +498,7 @@
         alert("請先選擇餐點再付款！");
         return;
       }
-      // 顯示付款區
       showPaymentArea();
-
-      // 顯示訂單摘要
       renderOrderSummary();
     });
 
@@ -391,7 +555,6 @@
     document.getElementById('btn-mail').addEventListener('click', () => {
       const obj = getOrderObject();
       if (!obj.items.length) return alert("沒有任何訂單內容！");
-      // 請把下面的店家 email 換成你的 email
       const shopEmail = "yourshop@example.com";
       const subject = encodeURIComponent("線上訂單通知 - " + (obj.customer.name || "未填姓名"));
       let body = `【線上訂單】%0A%0A`;
@@ -402,7 +565,6 @@
       body += `取餐人：${obj.customer.name}%0A電話：${obj.customer.tel}%0A取餐時間：${obj.customer.pickup}%0A備註：${obj.customer.note}%0A`;
       body += `%0A（顧客付款後請回報付款截圖或末五碼）%0A`;
 
-      // 開啟 mailto
       window.location.href = `mailto:${shopEmail}?subject=${subject}&body=${body}`;
     });
 
@@ -413,7 +575,6 @@
       const ans = confirm("已完成付款？建議請上傳付款截圖或將最後五碼傳給店家以利核對。按「確定」將顯示可複製的訂單摘要頁面。");
       if (ans) {
         renderOrderSummary();
-        // 把訂單摘要顯示在視窗，使用者可以長按複製或截圖
         alert("感謝付款！請截圖此頁或將付款截圖傳給店家以便核對。");
       }
     });
