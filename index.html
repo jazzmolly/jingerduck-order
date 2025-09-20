@@ -75,6 +75,16 @@
             background: white;
             margin-bottom: 20px; /* 增加表格間距 */
         }
+        
+        /* 類別標題樣式 */
+        .category-row th {
+            background-color: #f8f8f8;
+            color: var(--brand);
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 12px 10px;
+            border-bottom: 2px solid var(--brand);
+        }
 
         .menu-header {
             background: var(--brand);
@@ -95,16 +105,7 @@
         .menu-row:last-child {
             border-bottom: none;
         }
-        /* 類別標題樣式 */
-        .category-row th {
-            background-color: #f8f8f8;
-            color: var(--brand);
-            font-size: 1rem;
-            font-weight: 600;
-            padding: 12px 10px;
-            border-bottom: 2px solid var(--brand);
-        }
-
+       
         .item-cell {
             padding: 12px 8px;
             vertical-align: middle;
@@ -464,11 +465,10 @@
         <section class="menu-section">
             <h2 class="menu-title">🍲 請選擇想要的品項</h2>
             <h3 style="color: #666; font-size: 1rem; margin-top: -5px;">
-                小菜買5送1（送60小菜）
+                小菜買5送1（送60小菜），肉品買5送1（送90肉品）
             </h3>
             <p id="promotionMessage" style="color: var(--brand); font-weight: 600; text-align: center; margin: 10px 0; min-height: 20px;"></p>
-
-
+            
             <table class="menu-table">
                 <thead>
                     <tr>
@@ -690,7 +690,6 @@
                 }
                 
                 updateOrderData();
-                updateConfirmButton();
             });
 
             // 加減按鈕事件
@@ -744,96 +743,53 @@
             });
         }
 
-// ===== 更新訂單資料的函式 =====
-let totalResult = {
-    items: [],
-    total: 0,
-    customer: {}
-};
-
-function updateOrderData() {
-    const selectedItems = [];
-    let total = 0;
-
-    menuData.forEach(category => {
-        category.items.forEach(item => {
-            const checkbox = document.getElementById(item.id);
-            const qtyInput = document.getElementById(`qty-${item.id}`);
-
-            if (checkbox && checkbox.checked) {
-                const qty = parseInt(qtyInput.value) || 0;
-                const subtotal = item.price * qty;
-
-                if (qty > 0) {
-                    selectedItems.push({
-                        id: item.id,
-                        name: item.name,
-                        price: item.price,
-                        qty: qty,
-                        subtotal: subtotal,
-                        category: category.category
-                    });
-                }
-            }
-        });
-    });
-
-    totalResult.items = selectedItems;
-    
-    // 計算總價和顯示折扣提醒
-    calculateTotal();
-    displayPromotionMessage(); // 新增這行，用於顯示即時提醒
-    updateConfirmButton();
-}
-
-// ===== 顯示即時優惠提醒訊息 =====
-function displayPromotionMessage() {
-    const messageElement = document.getElementById('promotionMessage');
-    let sideDishCount = 0;
-    let meatCount = 0;
-    let messages = [];
-
-    // 計算小菜和肉品的數量
-    totalResult.items.forEach(item => {
-        if (item.category === '小菜類') {
-            sideDishCount += item.qty;
-        }
-        if (item.category === '單點肉類') {
-            meatCount += item.qty;
-        }
-    });
-
-    // 判斷小菜的提醒訊息
-    if (sideDishCount > 0) {
-        if (sideDishCount % 5 === 0) {
-            messages.push("👍 小菜已達成滿5送1優惠！");
-        } else if ((sideDishCount + 1) % 5 === 0) {
-            messages.push("小菜再加1份，即可獲得買5送1優惠！");
-        }
-    }
-
-    // 判斷肉品的提醒訊息
-    if (meatCount > 0) {
-        if (meatCount % 5 === 0) {
-            messages.push("👍 肉品已達成滿5送1優惠！");
-        } else if ((meatCount + 1) % 5 === 0) {
-            messages.push("肉品再加1份，即可獲得買5送1優惠！");
-        }
-    }
-
-    // 將所有訊息顯示在頁面上
-    messageElement.textContent = messages.join('  |  ');
-}
+        // ===== 更新訂單資料的函式 =====
+        let totalResult = {
+            items: [],
+            total: 0,
+            customer: {}
+        };
         
-        // ===== 計算總金額 (更新版，含兩種優惠) =====
-        async function calculateTotal() {
+        function updateOrderData() {
+            const selectedItems = [];
+            
+            menuData.forEach(category => {
+                category.items.forEach(item => {
+                    const checkbox = document.getElementById(item.id);
+                    const qtyInput = document.getElementById(`qty-${item.id}`);
+
+                    if (checkbox && checkbox.checked) {
+                        const qty = parseInt(qtyInput.value) || 0;
+                        if (qty > 0) {
+                             // 這裡不計算 subtotal，留給 calculateTotal 統一處理
+                            selectedItems.push({
+                                id: item.id,
+                                name: item.name,
+                                price: item.price,
+                                qty: qty,
+                                category: category.category
+                            });
+                        }
+                    }
+                });
+            });
+            
+            totalResult.items = selectedItems;
+            
+            calculateTotal();
+            displayPromotionMessage();
+            updateConfirmButton();
+        }
+        
+        // ===== 計算總金額 (修正版，包含兩種優惠) =====
+        function calculateTotal() {
             let finalTotal = 0;
             let sideDishCount = 0;
             let meatCount = 0;
 
-            // 分別計算兩種優惠品項的總數量和基本總價
+            // 1. 先計算原始總價和各品項數量
             totalResult.items.forEach(item => {
-                finalTotal += item.subtotal;
+                finalTotal += item.price * item.qty;
                 if (item.category === '小菜類') {
                     sideDishCount += item.qty;
                 }
@@ -842,17 +798,17 @@ function displayPromotionMessage() {
                 }
             });
             
-            // 處理小菜優惠
-            const freeSideDishes = Math.floor(sideDishCount / 5);
-            const sideDishDiscount = freeSideDishes * 60; // 買5送1，每份價值60元
+            // 2. 計算並套用「小菜」折扣
+            const freeSideDishes = Math.floor(sideDishCount / 6);
+            const sideDishDiscount = freeSideDishes * 60;
             
             if (sideDishDiscount > 0) {
                 finalTotal -= sideDishDiscount;
             }
 
-            // 處理肉品優惠
-            const freeMeats = Math.floor(meatCount / 5);
-            const meatDiscount = freeMeats * 90; // 買5送1，減免最低價90元
+            // 3. 計算並套用「肉片」折扣
+            const freeMeats = Math.floor(meatCount / 6);
+            const meatDiscount = freeMeats * 90;
             
             if (meatDiscount > 0) {
                 finalTotal -= meatDiscount;
@@ -860,6 +816,43 @@ function displayPromotionMessage() {
             
             totalResult.total = finalTotal;
             updateOrderDisplay();
+        }
+
+        // ===== 顯示即時優惠提醒訊息 =====
+        function displayPromotionMessage() {
+            const messageElement = document.getElementById('promotionMessage');
+            let sideDishCount = 0;
+            let meatCount = 0;
+            let messages = [];
+
+            totalResult.items.forEach(item => {
+                if (item.category === '小菜類') {
+                    sideDishCount += item.qty;
+                }
+                if (item.category === '單點肉類') {
+                    meatCount += item.qty;
+                }
+            });
+
+            // 小菜提醒
+            if (sideDishCount > 0) {
+                if (sideDishCount % 6 === 5) {
+                    messages.push("您己達到小菜買5送1優惠，請再免費選1份小菜！");
+                } else if (sideDishCount % 6 === 0) {
+                     messages.push("👍 小菜已達成買5送1優惠！");
+                }
+            }
+
+            // 肉品提醒
+            if (meatCount > 0) {
+                if (meatCount % 6 === 5) {
+                    messages.push("您己達到肉品買5送1優惠，請再免費選1份90元肉品！");
+                } else if (meatCount % 6 === 0) {
+                    messages.push("👍 肉品已達成買5送1優惠！");
+                }
+            }
+
+            messageElement.textContent = messages.join('  |  ');
         }
 
         // ===== 更新網頁顯示 =====
@@ -1009,13 +1002,12 @@ function displayPromotionMessage() {
             const pickupDateTime = `${pickupDate.replace(/-/g, '/')} ${pickupTime}`;
 
             let itemsText = totalResult.items.map(item =>
-                `• ${item.name} × ${item.qty} → NT$${item.subtotal.toLocaleString()}`
+                `• ${item.name} × ${item.qty} → NT$${(item.price * item.qty).toLocaleString()}`
             ).join('\n');
             
             // 如果有折扣，將其加入明細中
-            let totalWithoutDiscount = totalResult.items.filter(item => item.category !== '優惠活動').reduce((sum, item) => sum + item.subtotal, 0);
-            
-            const totalDiscount = totalWithoutDiscount - totalResult.total;
+            const totalBeforeDiscount = totalResult.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const totalDiscount = totalBeforeDiscount - totalResult.total;
             if (totalDiscount > 0) {
                 itemsText += `\n\n優惠折扣：-NT$${totalDiscount.toLocaleString()}`;
             }
@@ -1100,7 +1092,10 @@ ${itemsText}
                 const orderData = {
                     orderId: currentOrderId,
                     orderTime: new Date().toISOString(),
-                    items: totalResult.items,
+                    items: totalResult.items.map(item => ({
+                        ...item,
+                        subtotal: item.price * item.qty
+                    })),
                     total: totalResult.total,
                     customer: {
                         name: document.getElementById('customerName').value,
@@ -1110,20 +1105,26 @@ ${itemsText}
                         note: document.getElementById('orderNote').value || '無備註'
                     }
                 };
+
                 const response = await fetch(scriptUrl, {
                     method: 'POST',
-                    mode: 'no-cors',
+                    mode: 'no-cors', // Google Apps Script 需要 no-cors
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(orderData)
                 });
+
                 console.log('訂單已儲存到 Google Sheets');
             } catch (error) {
                 console.error('儲存到 Google Sheets 失敗：', error);
+                // 即使失敗也不影響主要流程
             }
         }
+
+        // ===== 即時更新確認按鈕 =====
+        document.addEventListener('change', updateConfirmButton);
+        document.addEventListener('input', updateConfirmButton);
     </script>
 </body>
 </html>
-
