@@ -466,6 +466,8 @@
             <h3 style="color: #666; font-size: 1rem; margin-top: -5px;">
                 小菜買5送1（送60小菜）
             </h3>
+            <p id="promotionMessage" style="color: var(--brand); font-weight: 600; text-align: center; margin: 10px 0; min-height: 20px;"></p>
+
 
             <table class="menu-table">
                 <thead>
@@ -742,45 +744,86 @@
             });
         }
 
-        // ===== 更新訂單資料的函式 =====
-        let totalResult = {
-            items: [],
-            total: 0,
-            customer: {}
-        };
-        
-        function updateOrderData() {
-            const selectedItems = [];
-            let total = 0;
+// ===== 更新訂單資料的函式 =====
+let totalResult = {
+    items: [],
+    total: 0,
+    customer: {}
+};
 
-            menuData.forEach(category => {
-                category.items.forEach(item => {
-                    const checkbox = document.getElementById(item.id);
-                    const qtyInput = document.getElementById(`qty-${item.id}`);
+function updateOrderData() {
+    const selectedItems = [];
+    let total = 0;
 
-                    if (checkbox && checkbox.checked) {
-                        const qty = parseInt(qtyInput.value) || 0;
-                        const subtotal = item.price * qty;
+    menuData.forEach(category => {
+        category.items.forEach(item => {
+            const checkbox = document.getElementById(item.id);
+            const qtyInput = document.getElementById(`qty-${item.id}`);
 
-                        if (qty > 0) {
-                            selectedItems.push({
-                                id: item.id,
-                                name: item.name,
-                                price: item.price,
-                                qty: qty,
-                                subtotal: subtotal,
-                                category: category.category // 新增此行
-                            });
-                        }
-                    }
-                });
-            });
-            
-            totalResult.items = selectedItems;
-            
-            calculateTotal();
-            updateConfirmButton();
+            if (checkbox && checkbox.checked) {
+                const qty = parseInt(qtyInput.value) || 0;
+                const subtotal = item.price * qty;
+
+                if (qty > 0) {
+                    selectedItems.push({
+                        id: item.id,
+                        name: item.name,
+                        price: item.price,
+                        qty: qty,
+                        subtotal: subtotal,
+                        category: category.category
+                    });
+                }
+            }
+        });
+    });
+
+    totalResult.items = selectedItems;
+    
+    // 計算總價和顯示折扣提醒
+    calculateTotal();
+    displayPromotionMessage(); // 新增這行，用於顯示即時提醒
+    updateConfirmButton();
+}
+
+// ===== 顯示即時優惠提醒訊息 =====
+function displayPromotionMessage() {
+    const messageElement = document.getElementById('promotionMessage');
+    let sideDishCount = 0;
+    let meatCount = 0;
+    let messages = [];
+
+    // 計算小菜和肉品的數量
+    totalResult.items.forEach(item => {
+        if (item.category === '小菜類') {
+            sideDishCount += item.qty;
         }
+        if (item.category === '單點肉類') {
+            meatCount += item.qty;
+        }
+    });
+
+    // 判斷小菜的提醒訊息
+    if (sideDishCount > 0) {
+        if (sideDishCount % 5 === 0) {
+            messages.push("👍 小菜已達成滿5送1優惠！");
+        } else if ((sideDishCount + 1) % 5 === 0) {
+            messages.push("小菜再加1份，即可獲得買5送1優惠！");
+        }
+    }
+
+    // 判斷肉品的提醒訊息
+    if (meatCount > 0) {
+        if (meatCount % 5 === 0) {
+            messages.push("👍 肉品已達成滿5送1優惠！");
+        } else if ((meatCount + 1) % 5 === 0) {
+            messages.push("肉品再加1份，即可獲得買5送1優惠！");
+        }
+    }
+
+    // 將所有訊息顯示在頁面上
+    messageElement.textContent = messages.join('  |  ');
+}
         
         // ===== 計算總金額 (更新版，含兩種優惠) =====
         async function calculateTotal() {
@@ -1083,3 +1126,4 @@ ${itemsText}
     </script>
 </body>
 </html>
+
