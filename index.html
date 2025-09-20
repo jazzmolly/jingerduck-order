@@ -453,9 +453,37 @@
             .qty-btn { width: 24px; height: 24px; font-size: 14px; }
             .qty-input { width: 28px; font-size: 13px; }
         }
+        
+        /* 浮動提示框樣式 */
+        .promotion-message-popup {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: var(--brand);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-weight: 600;
+            font-size: 1rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+            pointer-events: none;
+        }
+        
+        .promotion-message-popup.visible {
+            opacity: 1;
+            visibility: visible;
+        }
     </style>
 </head>
 <body>
+    <div id="promotionMessage" class="promotion-message-popup"></div>
+
     <div class="container">
         <header>
             <h1>薑薑 鴨肉小館</h1>
@@ -467,7 +495,6 @@
             <h3 style="color: #666; font-size: 1rem; margin-top: -5px;">
                 小菜買5送1（送60小菜），肉品買5送1（送90肉品）
             </h3>
-            <p id="promotionMessage" style="color: var(--brand); font-weight: 600; text-align: center; margin: 10px 0; min-height: 20px;"></p>
             
             <table class="menu-table">
                 <thead>
@@ -598,7 +625,8 @@
         }
         
         let currentOrderId = null;
-        
+        let promotionTimeoutId = null;
+
         // ===== 初始化 =====
         document.addEventListener('DOMContentLoaded', function() {
             initMenu();
@@ -761,7 +789,6 @@
                     if (checkbox && checkbox.checked) {
                         const qty = parseInt(qtyInput.value) || 0;
                         if (qty > 0) {
-                             // 這裡不計算 subtotal，留給 calculateTotal 統一處理
                             selectedItems.push({
                                 id: item.id,
                                 name: item.name,
@@ -806,7 +833,7 @@
                 finalTotal -= sideDishDiscount;
             }
 
-            // 3. 計算並套用「肉片」折扣
+            // 3. 計算並套用「肉品」折扣
             const freeMeats = Math.floor(meatCount / 6);
             const meatDiscount = freeMeats * 90;
             
@@ -818,7 +845,7 @@
             updateOrderDisplay();
         }
 
-        // ===== 顯示即時優惠提醒訊息 =====
+        // ===== 顯示即時優惠提醒訊息 (修正版) =====
         function displayPromotionMessage() {
             const messageElement = document.getElementById('promotionMessage');
             let sideDishCount = 0;
@@ -837,22 +864,40 @@
             // 小菜提醒
             if (sideDishCount > 0) {
                 if (sideDishCount % 6 === 5) {
-                    messages.push("您己達到小菜買5送1優惠，請再免費選1份小菜！");
+                    messages.push("您已達到小菜買5送1優惠，請再免費選1份小菜！");
                 } else if (sideDishCount % 6 === 0) {
-                     messages.push("👍 小菜已達成買5送1優惠！");
+                    messages.push("👍 小菜已達成買5送1優惠！");
                 }
             }
 
             // 肉品提醒
             if (meatCount > 0) {
                 if (meatCount % 6 === 5) {
-                    messages.push("您己達到肉品買5送1優惠，請再免費選1份90元肉品！");
+                    messages.push("您已達到肉品買5送1優惠，請再免費選1份90元肉品！");
                 } else if (meatCount % 6 === 0) {
                     messages.push("👍 肉品已達成買5送1優惠！");
                 }
             }
 
-            messageElement.textContent = messages.join('  |  ');
+            // 顯示或隱藏浮動視窗
+            if (messages.length > 0) {
+                messageElement.textContent = messages.join('  |  ');
+                messageElement.classList.add('visible');
+                // 清除舊的計時器，避免重複
+                if (promotionTimeoutId) {
+                    clearTimeout(promotionTimeoutId);
+                }
+                // 設定新的計時器，3秒後隱藏
+                promotionTimeoutId = setTimeout(() => {
+                    messageElement.classList.remove('visible');
+                }, 3000);
+            } else {
+                // 如果沒有訊息，確保視窗隱藏
+                messageElement.classList.remove('visible');
+                if (promotionTimeoutId) {
+                    clearTimeout(promotionTimeoutId);
+                }
+            }
         }
 
         // ===== 更新網頁顯示 =====
