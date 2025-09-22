@@ -864,7 +864,7 @@
             // 小菜提醒
             if (sideDishCount > 0) {
                 if (sideDishCount % 6 === 5) {
-                    messages.push("您已達到小菜買5送1優惠，請再免費選1份小菜！");
+                    messages.push("小菜再加1份，即可獲得買5送1優惠！");
                 } else if (sideDishCount % 6 === 0) {
                     messages.push("👍 小菜已達成買5送1優惠！");
                 }
@@ -873,7 +873,7 @@
             // 肉品提醒
             if (meatCount > 0) {
                 if (meatCount % 6 === 5) {
-                    messages.push("您已達到肉品買5送1優惠，請再免費選1份90元肉品！");
+                    messages.push("肉品再加1份，即可獲得買5送1優惠！");
                 } else if (meatCount % 6 === 0) {
                     messages.push("👍 肉品已達成買5送1優惠！");
                 }
@@ -881,18 +881,16 @@
 
             // 顯示或隱藏浮動視窗
             if (messages.length > 0) {
-                messageElement.textContent = messages.join('  |  ');
+                // 將訊息用換行符號連接
+                messageElement.textContent = messages.join('\n');
                 messageElement.classList.add('visible');
-                // 清除舊的計時器，避免重複
                 if (promotionTimeoutId) {
                     clearTimeout(promotionTimeoutId);
                 }
-                // 設定新的計時器，3秒後隱藏
                 promotionTimeoutId = setTimeout(() => {
                     messageElement.classList.remove('visible');
                 }, 3000);
             } else {
-                // 如果沒有訊息，確保視窗隱藏
                 messageElement.classList.remove('visible');
                 if (promotionTimeoutId) {
                     clearTimeout(promotionTimeoutId);
@@ -1173,4 +1171,5 @@ ${itemsText}
     </script>
 </body>
 </html>
+
 
