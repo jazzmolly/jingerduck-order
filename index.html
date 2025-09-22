@@ -468,11 +468,12 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             font-weight: 600;
             font-size: 1rem;
-            white-space: nowrap;
+            white-space: pre-wrap; /* 修正：改為 pre-wrap 讓換行符號生效 */
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
             pointer-events: none;
+            max-width: 85%; /* 新增：增加最大寬度限制，避免在寬螢幕上過長 */
         }
         
         .promotion-message-popup.visible {
@@ -571,9 +572,9 @@
             {
                 category: "薑母鴨類",
                 items: [
-                    { id: "duck-large", name: "九珍薑母鴨（大, 12塊肉）", price: 450 },
-                    { id: "duck-medium", name: "九珍薑母鴨（中, 9塊肉）", price: 350 },
-                    { id: "duck-small", name: "九珍薑母鴨（小, 6塊肉）", price: 250 },
+                    { id: "duck-large", name: "薑母鴨（大, 12塊肉+2300g 湯底）", price: 450 },
+                    { id: "duck-medium", name: "薑母鴨（中, 9塊肉+1600g 湯底）", price: 350 },
+                    { id: "duck-small", name: "薑母鴨（小, 6塊肉+1000g 湯底）", price: 250 },
                     { id: "soup-base", name: "湯底 （1000g)", price: 80 }
                 ]
             },
@@ -881,16 +882,18 @@
 
             // 顯示或隱藏浮動視窗
             if (messages.length > 0) {
-                // 將訊息用換行符號連接
-                messageElement.textContent = messages.join('\n');
+                messageElement.textContent = messages.join('\n'); // 使用換行符號
                 messageElement.classList.add('visible');
+                // 清除舊的計時器，避免重複
                 if (promotionTimeoutId) {
                     clearTimeout(promotionTimeoutId);
                 }
+                // 設定新的計時器，3秒後隱藏
                 promotionTimeoutId = setTimeout(() => {
                     messageElement.classList.remove('visible');
                 }, 3000);
             } else {
+                // 如果沒有訊息，確保視窗隱藏
                 messageElement.classList.remove('visible');
                 if (promotionTimeoutId) {
                     clearTimeout(promotionTimeoutId);
@@ -1171,7 +1174,3 @@ ${itemsText}
     </script>
 </body>
 </html>
-
-
-
-
