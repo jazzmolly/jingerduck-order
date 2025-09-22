@@ -991,7 +991,7 @@
                 const selectedDate = new Date(this.value);
                 // 檢查是否為星期一
                 if (selectedDate.getDay() === 1) {
-                    alert('不好意思，我們市場公休，每週一不營業，請選擇其他日期！');
+                    alert('不好意思，每週一為公休日，請選擇其他日期！');
                     
                     // 自動跳到隔天 (星期二)
                     const nextDay = new Date(selectedDate);
@@ -1230,4 +1230,5 @@ ${itemsText}
     </script>
 </body>
 </html>
+
 
