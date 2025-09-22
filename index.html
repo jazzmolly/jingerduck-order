@@ -468,17 +468,26 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             font-weight: 600;
             font-size: 1rem;
-            white-space: pre-wrap; /* 修正：改為 pre-wrap 讓換行符號生效 */
+            white-space: pre-wrap;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
             pointer-events: none;
-            max-width: 85%; /* 新增：增加最大寬度限制，避免在寬螢幕上過長 */
+            max-width: 85%;
         }
         
         .promotion-message-popup.visible {
             opacity: 1;
             visibility: visible;
+        }
+
+        /* 禁用日期樣式 */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+        }
+        input[type="date"]:disabled {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -865,7 +874,7 @@
             // 小菜提醒
             if (sideDishCount > 0) {
                 if (sideDishCount % 6 === 5) {
-                    messages.push("您己達到小菜買5送1優惠，請再免費選1份小菜！");
+                    messages.push("您己達到小菜買5送1優惠，請再免費選1份小菜");
                 } else if (sideDishCount % 6 === 0) {
                     messages.push("👍 小菜已達成買5送1優惠！");
                 }
@@ -874,7 +883,7 @@
             // 肉品提醒
             if (meatCount > 0) {
                 if (meatCount % 6 === 5) {
-                    messages.push("您己達到肉品買5送1優惠，請再免費選1份90元肉品！");
+                    messages.push("您己達到肉品買5送1優惠，請再免費選1份肉品！");
                 } else if (meatCount % 6 === 0) {
                     messages.push("👍 肉品已達成買5送1優惠！");
                 }
@@ -952,14 +961,61 @@
             });
         }
 
-        // ===== 初始化日期時間 =====
+        // ===== 初始化日期時間 (修正版) =====
         function initDateTime() {
-            const today = new Date();
             const pickupDate = document.getElementById('pickupDate');
             const pickupTime = document.getElementById('pickupTime');
-            pickupDate.value = today.toISOString().split('T')[0];
+            
+            // 處理日期：鎖定星期一
+            const today = new Date();
+            let tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+
+            // 如果今天或明天是星期一，則跳過
+            if (today.getDay() === 1) { // 1代表星期一
+                tomorrow.setDate(today.getDate() + 2); // 跳到星期二
+            } else if (tomorrow.getDay() === 1) {
+                tomorrow.setDate(tomorrow.getDate() + 1); // 跳到星期二
+            }
+
+            // 確保初始日期不是星期一
+            let initialDate = new Date(today);
+            while (initialDate.getDay() === 1) {
+                initialDate.setDate(initialDate.getDate() + 1);
+            }
+            pickupDate.value = initialDate.toISOString().split('T')[0];
+            pickupDate.min = initialDate.toISOString().split('T')[0];
+
+            // 監聽日期變更
+            pickupDate.addEventListener('input', function() {
+                const selectedDate = new Date(this.value);
+                // 檢查是否為星期一
+                if (selectedDate.getDay() === 1) {
+                    alert('不好意思，我們市場公休，每週一不營業，請選擇其他日期！');
+                    
+                    // 自動跳到隔天 (星期二)
+                    const nextDay = new Date(selectedDate);
+                    nextDay.setDate(selectedDate.getDate() + 1);
+                    this.value = nextDay.toISOString().split('T')[0];
+                }
+            });
+
+            // 處理時間：設定為24小時制
+            const now = new Date();
+            const hours = now.getHours();
+            let initialTime;
+            if (hours < 10) {
+                initialTime = "10:00";
+            } else if (hours > 18) {
+                initialTime = "18:00";
+            } else {
+                initialTime = `${hours.toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            }
+
+            // 設定預設取餐時間
             pickupTime.value = '11:00';
-            pickupDate.min = today.toISOString().split('T')[0];
+            
+            // 監聽時間變更
             pickupTime.addEventListener('change', function() {
                 const time = this.value;
                 if (time < '10:00' || time > '18:00') {
@@ -1174,4 +1230,3 @@ ${itemsText}
     </script>
 </body>
 </html>
-
