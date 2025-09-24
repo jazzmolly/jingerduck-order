@@ -453,7 +453,7 @@
             .qty-btn { width: 24px; height: 24px; font-size: 14px; }
             .qty-input { width: 28px; font-size: 13px; }
         }
-        
+
         /* 浮動提示框樣式 */
         .promotion-message-popup {
             position: fixed;
@@ -503,8 +503,7 @@
         <section class="menu-section">
             <h2 class="menu-title">🍲 請選擇想要的品項</h2>
             <h3 style="color: #666; font-size: 1rem; margin-top: -5px;">
-                小菜買5送1（送60小菜），肉品買5送1（送90肉品）<br>
-                開幕期間，購買大份薑母鴨贈送一份麵線
+                小菜買5送1（送60小菜），肉品買5送1（送90肉品）
             </h3>
             
             <table class="menu-table">
@@ -582,16 +581,17 @@
             {
                 category: "薑母鴨類",
                 items: [
-                    { id: "duck-large", name: "薑母鴨（大, 12塊肉）", price: 450 },
-                    { id: "duck-medium", name: "薑母鴨（中, 9塊肉）", price: 350 },
-                    { id: "duck-small", name: "薑母鴨（小, 6塊肉）", price: 250 },
-                    { id: "soup-base", name: "湯底 （1500g)", price: 100 }
+                    { id: "duck-large", name: "薑母鴨（大, 12塊肉+2300g 湯底）", price: 450 },
+                    { id: "duck-medium", name: "薑母鴨（中, 9塊肉+1600g 湯底）", price: 350 },
+                    { id: "duck-small", name: "薑母鴨（小, 6塊肉+1000g 湯底）", price: 250 },
+                    { id: "soup-base", name: "湯底 （1000g)", price: 80 }
                 ]
             },
             {
                 category: "小菜類",
                 items: [
                     { id: "duck-ball", name: "鴨肉丸", price: 60 },
+                    { id: "duck-claw", name: "鴨爪", price: 60 },
                     { id: "duck-gizzard", name: "鴨胗", price: 60 },
                     { id: "duck-tendon", name: "鴨腱", price: 60 },
                     { id: "duck-intestine", name: "鴨腸", price: 60 },
@@ -625,11 +625,10 @@
                 category: "其它",
                 items: [
                     { id: "jinger-juice", name: "薑汁", price: 50 },
-                    { id: "tofu-pickle", name: "豆腐乳", price: 10 },                    
-                 ]
-            },
-            ];
-        
+                    { id: "tofu-pickle", name: "豆腐乳", price: 10 }
+                ]
+            }
+        ];
         
         // ===== 輔助函式：根據 ID 尋找菜單項目 =====
         function findItemById(itemId) {
@@ -882,7 +881,7 @@
             // 小菜提醒
             if (sideDishCount > 0) {
                 if (sideDishCount % 6 === 5) {
-                    messages.push("您己達到小菜買5送1優惠，請再免費選1份小菜");
+                    messages.push("小菜再加1份，即可獲得買5送1優惠！");
                 } else if (sideDishCount % 6 === 0) {
                     messages.push("👍 小菜已達成買5送1優惠！");
                 }
@@ -891,7 +890,7 @@
             // 肉品提醒
             if (meatCount > 0) {
                 if (meatCount % 6 === 5) {
-                    messages.push("您己達到肉品買5送1優惠，請再免費選1份90元肉品！");
+                    messages.push("肉品再加1份，即可獲得買5送1優惠！");
                 } else if (meatCount % 6 === 0) {
                     messages.push("👍 肉品已達成買5送1優惠！");
                 }
@@ -999,7 +998,7 @@
                 const selectedDate = new Date(this.value);
                 // 檢查是否為星期一
                 if (selectedDate.getDay() === 1) {
-                    alert('不好意思，每週一為公休日，請選擇其他日期！');
+                    alert('不好意思，我們市場公休，每週一不營業，請選擇其他日期！');
                     
                     // 自動跳到隔天 (星期二)
                     const nextDay = new Date(selectedDate);
@@ -1238,11 +1237,3 @@ ${itemsText}
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
