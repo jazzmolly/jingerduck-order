@@ -592,12 +592,13 @@
             <button class="confirm-btn" id="confirmOrder" disabled>✅ 確認訂單</button>
             <div id="shareSection" class="share-section" style="display: none;">
                 <h3 style="margin: 0 0 15px 0;">🎉 訂單已建立，請前往付款！</h3>
-                <p style="margin: 0 0 20px 0; opacity: 0.9;">請點擊下方按鈕，即可開啟街口支付完成付款</p>
                 
+                <div class="order-summary" id="orderPreview"></div>
+
                 <div class="payment-section">
                     <h4>街口支付付款</h4>
-                    <p>將自動帶入金額，讓您輕鬆完成付款。</p>
-                    <a id="jkoPayLink" href="#" target="_blank" class="share-btn" style="background: #28a745; color: white;">📲 前往街口支付</a>
+                    <p>請點擊按鈕開啟街口 App，金額和訂單編號將自動帶入。</p>
+                    <a id="jkoPayLink" href="#" target="_blank" class="share-btn" style="background: #28a745; color: white; width: 80%; max-width: 250px;">📲 前往街口支付</a>
                 </div>
                 
                 <div style="margin-top: 20px;">
@@ -605,7 +606,7 @@
                     <button id="copyOrder" class="share-btn">📋 複製訂單</button>
                 </div>
                 
-                <button id="backToMenu" class="share-btn danger">🔄 返回選單</button>
+                <button id="backToMenu" class="share-btn danger" style="margin-top: 20px;">🔄 返回選單</button>
             </div>
         </section>
 
@@ -1153,7 +1154,9 @@
             
             // 根據訂單總金額和帳號生成街口支付連結
             const jkoPayAccount = '905087839';
-            const jkoPayLink = `jkopay://transfer?to=${jkoPayAccount}&amount=${totalAmount}`;
+            // 備註部分，我們將嘗試將訂單編號帶入 memo 參數中
+            const memo = encodeURIComponent(`訂單編號：#${currentOrderId}`);
+            const jkoPayLink = `jkopay://transfer?to=${jkoPayAccount}&amount=${totalAmount}&memo=${memo}`;
 
             document.getElementById('jkoPayLink').href = jkoPayLink;
             
