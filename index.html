@@ -416,6 +416,36 @@
             max-height: 300px;
             overflow-y: auto;
         }
+        
+        /* 新增付款區塊樣式 */
+        .payment-section {
+            background: #fff;
+            color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px dashed #ccc;
+        }
+        
+        .payment-section h4 {
+            margin: 0 0 10px 0;
+            font-weight: bold;
+            color: var(--brand);
+        }
+        
+        .payment-section p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        
+        .payment-qr-code {
+            display: block;
+            margin: 15px auto 10px;
+            max-width: 150px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+        }
 
         /* 響應式設計 */
         @media (max-width: 768px) {
@@ -560,12 +590,21 @@
 
         <section class="confirm-section">
             <button class="confirm-btn" id="confirmOrder" disabled>✅ 確認訂單</button>
-            <div id="shareSection" class="share-section">
-                <h3 style="margin: 0 0 15px 0;">🎉 訂單已準備完成！</h3>
-                <p style="margin: 0 0 20px 0; opacity: 0.9;">請分享訂單給店家，我們會盡快為您準備</p>
-                <div id="orderPreview" class="order-summary"></div>
-                <a href="#" id="shareToLine" class="share-btn">📱 分享到 LINE</a>
-                <button id="copyOrder" class="share-btn">📋 複製訂單</button>
+            <div id="shareSection" class="share-section" style="display: none;">
+                <h3 style="margin: 0 0 15px 0;">🎉 訂單已建立，請前往付款！</h3>
+                <p style="margin: 0 0 20px 0; opacity: 0.9;">請點擊下方按鈕，即可開啟街口支付完成付款</p>
+                
+                <div class="payment-section">
+                    <h4>街口支付付款</h4>
+                    <p>將自動帶入金額，讓您輕鬆完成付款。</p>
+                    <a id="jkoPayLink" href="#" target="_blank" class="share-btn" style="background: #28a745; color: white;">📲 前往街口支付</a>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <a href="#" id="shareToLine" class="share-btn">📱 分享到 LINE</a>
+                    <button id="copyOrder" class="share-btn">📋 複製訂單</button>
+                </div>
+                
                 <button id="backToMenu" class="share-btn danger">🔄 返回選單</button>
             </div>
         </section>
@@ -591,6 +630,7 @@
                 category: "小菜類",
                 items: [
                     { id: "duck-ball", name: "鴨肉丸", price: 60 },
+                    { id: "duck-claw", name: "鴨爪", price: 60 },
                     { id: "duck-gizzard", name: "鴨胗", price: 60 },
                     { id: "duck-tendon", name: "鴨腱", price: 60 },
                     { id: "duck-intestine", name: "鴨腸", price: 60 },
@@ -624,8 +664,7 @@
                 category: "其它",
                 items: [
                     { id: "jinger-juice", name: "薑汁", price: 50 },
-                    { id: "tofu-pickle", name: "豆腐乳", price: 10 },
-                    { id: "prince-noodles", name: "王子麵", price: 15 }
+                    { id: "tofu-pickle", name: "豆腐乳", price: 10 }
                 ]
             }
         ];
@@ -881,7 +920,7 @@
             // 小菜提醒
             if (sideDishCount > 0) {
                 if (sideDishCount % 6 === 5) {
-                    messages.push("您己達到小菜買5送1優惠，請再免費選1份小菜！");
+                    messages.push("小菜再加1份，即可獲得買5送1優惠！");
                 } else if (sideDishCount % 6 === 0) {
                     messages.push("👍 小菜已達成買5送1優惠！");
                 }
@@ -890,7 +929,7 @@
             // 肉品提醒
             if (meatCount > 0) {
                 if (meatCount % 6 === 5) {
-                    messages.push("您己達到肉品買5送1優惠，請再免費選1份90元肉品！");
+                    messages.push("肉品再加1份，即可獲得買5送1優惠！");
                 } else if (meatCount % 6 === 0) {
                     messages.push("👍 肉品已達成買5送1優惠！");
                 }
@@ -1075,13 +1114,13 @@
             // 生成訂單編號
             const timestamp = new Date().getTime();
             currentOrderId = `JD${timestamp.toString().slice(-6)}`;
-
+            
             // 顯示訂單預覽
             showOrderPreview();
 
             // 顯示分享區塊
             showShareSection();
-            
+
             // 滾動到分享區
             document.getElementById('shareSection').scrollIntoView({
                 behavior: 'smooth',
@@ -1109,7 +1148,15 @@
             const pickupTime = document.getElementById('pickupTime').value;
             const orderNote = document.getElementById('orderNote').value || '無備註';
             const pickupDateTime = `${pickupDate.replace(/-/g, '/')} ${pickupTime}`;
+            
+            const totalAmount = totalResult.total;
+            
+            // 根據訂單總金額和帳號生成街口支付連結
+            const jkoPayAccount = '905087839';
+            const jkoPayLink = `jkopay://transfer?to=${jkoPayAccount}&amount=${totalAmount}`;
 
+            document.getElementById('jkoPayLink').href = jkoPayLink;
+            
             let itemsText = totalResult.items.map(item =>
                 `• ${item.name} × ${item.qty} → NT$${(item.price * item.qty).toLocaleString()}`
             ).join('\n');
@@ -1190,12 +1237,8 @@ ${itemsText}
 
         // ===== 儲存到 Google Sheets =====
         async function saveToGoogleSheets(totalResult) {
+            // 請在此處填入你部署的 Google Apps Script URL
             const scriptUrl = 'https://script.google.com/macros/s/AKfycbzQWz1pK-I5NyQS__M-1_3EUXZsZWSq5Ns1Y3CCtXiiSqMXA8Rs2Kl8KmP4oRp2D0_36g/exec';
-
-            if (scriptUrl === 'YOUR_GOOGLE_APPS_SCRIPT_URL') {
-                console.log('Google Sheets 整合：請設定 Google Apps Script Web App URL');
-                return;
-            }
 
             try {
                 const orderData = {
@@ -1237,6 +1280,3 @@ ${itemsText}
     </script>
 </body>
 </html>
-
-
-
