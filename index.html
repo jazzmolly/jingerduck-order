@@ -546,8 +546,8 @@
                         <input type="date" id="pickupDate" class="form-input" required>
                     </div>
                     <div style="flex: 1;">
-                        <label class="form-label required" for="pickupTime">取餐時間 <span class="time-note">(營業時間 10:00-18:00)</span></label>
-                        <input type="time" id="pickupTime" class="form-input" min="10:00" max="18:00" required>
+                        <label class="form-label required" for="pickupTime">取餐時間 <span class="time-note">(營業時間 11:00-19:00)</span></label>
+                        <input type="time" id="pickupTime" class="form-input" min="11:00" max="19:00" required>
                     </div>
                 </div>
 
@@ -564,12 +564,9 @@
                 <h3 style="margin: 0 0 15px 0;">🎉 訂單已準備完成！</h3>
                 <p style="margin: 0 0 20px 0; opacity: 0.9;">請分享訂單給店家，我們會盡快為您準備</p>
                 <div id="orderPreview" class="order-summary"></div>
-                <a href="#" id="shareToLine" class="share-btn">📱 分享到店家LINE官帳</a>
+                <a href="#" id="shareToLine" class="share-btn">📱 分享到 LINE</a>
                 <button id="copyOrder" class="share-btn">📋 複製訂單</button>
-                <button id="backToMenu" class="share-btn danger">🔄 返回選單</button><br>
-                <p style="color: red; font-size: 14px; margin-top: 4px;">
-                  將訂單分享給店家LINE官方帳號（@198usxgc）才算送出訂單哦！
-                </p>
+                <button id="backToMenu" class="share-btn danger">🔄 返回選單</button>
             </div>
         </section>
 
@@ -1014,10 +1011,10 @@
             const now = new Date();
             const hours = now.getHours();
             let initialTime;
-            if (hours < 10) {
-                initialTime = "10:00";
-            } else if (hours > 18) {
-                initialTime = "18:00";
+            if (hours < 11) {
+                initialTime = "11:00";
+            } else if (hours > 19) {
+                initialTime = "19:00";
             } else {
                 initialTime = `${hours.toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
             }
@@ -1028,8 +1025,8 @@
             // 監聽時間變更
             pickupTime.addEventListener('change', function() {
                 const time = this.value;
-                if (time < '10:00' || time > '18:00') {
-                    alert('取餐時間請選擇 10:00-18:00 之間');
+                if (time < '11:00' || time > '19:00') {
+                    alert('取餐時間請選擇 11:00-19:00 之間');
                     this.value = '11:00';
                 }
             });
@@ -1240,12 +1237,3 @@ ${itemsText}
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
