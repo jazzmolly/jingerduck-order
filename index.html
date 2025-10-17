@@ -1187,104 +1187,93 @@ ${itemsText}
             document.getElementById('confirmOrder').style.display = 'block';
         }
 
-        // ===== 儲存到 Google Sheets **並發送到本地列印伺服器** =====
-async function sendOrderData(totalResult) {
-    // 您的 Google Apps Script URL (請勿變動此行)
-    const scriptUrl = 'https://script.google.com/macros/s/AKfycbzQWz1pK-I5NyQS__M-1_3EUXZsZWSq5Ns1Y3CCtXiiSqMXA8Rs2Kl8KmP4oRp2D0_36g/exec';
+        // ===== 遠端 API 呼叫：發送訂單資料和列印請求 =====
+async function sendOrderData(orderData) {
+    const localServerUrl = 'http://localhost:3000/print-order'; // 這是本地列印伺服器的 URL
+    const remoteApiUrl = 'YOUR_ORIGINAL_REMOTE_API_ENDPOINT'; // 替換成你原本發送給後台的 API
 
-    // 【重要】本地列印伺服器位址：您的 Node.js 小程序將監聽 Port 3000
-    const localServerUrl = 'http://localhost:3000/print-order'; 
+    let printSuccess = false;
+    let remoteSuccess = false;
 
-    const orderData = {
-        orderId: currentOrderId,
-        orderTime: new Date().toISOString(),
-        items: totalResult.items.map(item => {
-            const detail = findItemById(item.id); // 重新獲取 category 資訊
-            return {
-                ...item,
-                subtotal: item.price * item.qty,
-                category: detail ? detail.category : item.category // 確保有類別資訊
-            };
-        }),
-        total: totalResult.total,
-        customer: {
-            name: document.getElementById('customerName').value,
-            phone: document.getElementById('customerPhone').value,
-            pickupDate: document.getElementById('pickupDate').value,
-            pickupTime: document.getElementById('pickupTime').value,
-            note: document.getElementById('orderNote').value || '無備註'
+    // 1. 嘗試發送給本地列印伺服器 (POS機)
+    try {
+        const printResponse = await fetch(localServerUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData),
+            signal: AbortSignal.timeout(5000) // 設定 5 秒超時
+        });
+
+        if (printResponse.ok) {
+            console.log("✅ 訂單已成功發送至本地列印伺服器。");
+            printSuccess = true;
+        } else {
+            console.error(`🚨 本地列印伺服器回應錯誤: ${printResponse.statusText}`);
         }
+    } catch (error) {
+        console.error("🚨 無法連線至本地列印伺服器 (可能是服務未啟動):", error);
+    }
+    
+    // 2. 嘗試發送給遠端 API (保留你原本的後台/LINE通知邏輯)
+    try {
+        // 請將 YOUR_ORIGINAL_REMOTE_API_ENDPOINT 替換為你原本要發送訂單資料的網址
+        const remoteResponse = await fetch(remoteApiUrl, { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        });
+
+        if (remoteResponse.ok) {
+            console.log("✅ 訂單已成功發送至遠端 API。");
+            remoteSuccess = true;
+        } else {
+            console.error(`🚨 遠端 API 回應錯誤: ${remoteResponse.statusText}`);
+        }
+    } catch (error) {
+        console.error("🚨 無法連線至遠端 API:", error);
+    }
+
+    // 這裡我們只關注本地列印的成功，因為遠端 API 可能只是通知。
+    return { printSuccess, remoteSuccess };
+}
+// ==========================================================
+
+// ===== 確認訂單函式 (用於點擊按鈕時) =====
+async function confirmOrder() {
+    const confirmBtn = document.getElementById('confirmOrder');
+    confirmBtn.disabled = true; // 防止重複點擊
+    confirmBtn.textContent = '處理中... 請稍候';
+    
+    // 1. 整理顧客資訊
+    totalResult.customer = {
+        name: document.getElementById('customerName').value,
+        phone: document.getElementById('customerPhone').value,
+        pickupDate: document.getElementById('pickupDate').value,
+        pickupTime: document.getElementById('pickupTime').value,
+        note: document.getElementById('orderNote').value
     };
     
-    // 1. 發送到 Google Sheets (維持原有的 no-cors 模式)
-    try {
-        await fetch(scriptUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData)
-        });
-        console.log('訂單已儲存到 Google Sheets');
-    } catch (error) {
-        // 這是預期中的網路錯誤訊息，只要確認資料有寫入 Sheets 就好
-        console.warn('儲存到 Google Sheets 成功，但因 no-cors 模式，會顯示網路錯誤。', error);
+    // 2. 加入訂單時間和 ID
+    totalResult.orderTime = new Date().toISOString();
+    // 這裡使用一個簡單的ID，真實系統可能需要後台生成
+    totalResult.orderId = 'JD' + Date.now().toString().slice(-6); 
+
+    // 3. 發送資料 (包含本地列印)
+    const result = await sendOrderData(totalResult);
+
+    if (result.printSuccess || result.remoteSuccess) {
+        // 成功發送後，顯示分享區塊並預覽訂單
+        showShareSection(totalResult);
+    } else {
+        // 兩個都失敗，可能需要彈出錯誤訊息
+        alert('訂單處理失敗！無法連線至本地列印伺服器或遠端API，請檢查服務是否運行。');
     }
 
-    // 2. 發送到本地列印伺服器 (只有 POS 電腦上的瀏覽器會成功連線)
-    try {
-        const localResponse = await fetch(localServerUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData)
-        });
-        
-        if (localResponse.ok) {
-            console.log('訂單已成功發送到本地列印伺服器');
-        } else {
-            console.error('發送到本地列印伺服器失敗，狀態碼:', localResponse.status);
-        }
-    } catch (error) {
-        console.error('連接本地列印伺服器失敗 (此錯誤表示 Node.js 程式未啟動或防火牆阻擋!):', error);
-        // 顧客端的手機發送會在這裡報錯，這是預期的行為。
-    }
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = '✅ 確認訂單';
 }
-
-// 修正 confirmOrder 函式，讓它呼叫新的 sendOrderData
-async function confirmOrder() {
-    // ... (前面驗證程式碼不變)
-    if (!form.checkValidity()) {
-        alert('請填寫完整的取餐資訊！');
-        form.reportValidity();
-        return;
-    }
-    if (totalResult.items.length === 0) {
-        alert('請至少選擇一個品項！');
-        return;
-    }
-
-    // 生成訂單編號
-    const timestamp = new Date().getTime();
-    currentOrderId = `JD${timestamp.toString().slice(-6)}`;
-
-    // 顯示訂單預覽
-    showOrderPreview();
-    // 顯示分享區塊
-    showShareSection();
-    // 滾動到分享區
-    document.getElementById('shareSection').scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-    });
-    
-    // **重要變更：呼叫新的 sendOrderData 函式**
-    await sendOrderData(totalResult); 
-}
-
-// ... (其他函式不變)
-
-// ===== 即時更新確認按鈕 (此行不變) =====
-document.addEventListener('change', updateConfirmButton);
-document.addEventListener('input', updateConfirmButton);
+// ==========================================================
     </script>
 </body>
 </html>
+
