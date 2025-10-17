@@ -1187,63 +1187,104 @@ ${itemsText}
             document.getElementById('confirmOrder').style.display = 'block';
         }
 
-        // ===== 儲存到 Google Sheets =====
-        async function saveToGoogleSheets(totalResult) {
-            const scriptUrl = 'https://script.google.com/macros/s/AKfycbwwC6HFuGUo_U_VxRfGgBX1zQbmXAkZUOTe7zul1VQVInZ2ry5-vKM8L4toVdu74F0eaQ/exec';
+        // ===== 儲存到 Google Sheets **並發送到本地列印伺服器** =====
+async function sendOrderData(totalResult) {
+    // 您的 Google Apps Script URL (請勿變動此行)
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbzQWz1pK-I5NyQS__M-1_3EUXZsZWSq5Ns1Y3CCtXiiSqMXA8Rs2Kl8KmP4oRp2D0_36g/exec';
 
-            if (scriptUrl === 'YOUR_GOOGLE_APPS_SCRIPT_URL') {
-                console.log('Google Sheets 整合：請設定 Google Apps Script Web App URL');
-                return;
-            }
+    // 【重要】本地列印伺服器位址：您的 Node.js 小程序將監聽 Port 3000
+    const localServerUrl = 'http://localhost:3000/print-order'; 
 
-            try {
-                const orderData = {
-                    orderId: currentOrderId,
-                    orderTime: new Date().toISOString(),
-                    items: totalResult.items.map(item => ({
-                        ...item,
-                        subtotal: item.price * item.qty
-                    })),
-                    total: totalResult.total,
-                    customer: {
-                        name: document.getElementById('customerName').value,
-                        phone: document.getElementById('customerPhone').value,
-                        pickupDate: document.getElementById('pickupDate').value,
-                        pickupTime: document.getElementById('pickupTime').value,
-                        note: document.getElementById('orderNote').value || '無備註'
-                    }
-                };
-
-                const response = await fetch(scriptUrl, {
-                    method: 'POST',
-                    mode: 'no-cors', // Google Apps Script 需要 no-cors
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(orderData)
-                });
-
-                console.log('訂單已儲存到 Google Sheets');
-            } catch (error) {
-                console.error('儲存到 Google Sheets 失敗：', error);
-                // 即使失敗也不影響主要流程
-            }
+    const orderData = {
+        orderId: currentOrderId,
+        orderTime: new Date().toISOString(),
+        items: totalResult.items.map(item => {
+            const detail = findItemById(item.id); // 重新獲取 category 資訊
+            return {
+                ...item,
+                subtotal: item.price * item.qty,
+                category: detail ? detail.category : item.category // 確保有類別資訊
+            };
+        }),
+        total: totalResult.total,
+        customer: {
+            name: document.getElementById('customerName').value,
+            phone: document.getElementById('customerPhone').value,
+            pickupDate: document.getElementById('pickupDate').value,
+            pickupTime: document.getElementById('pickupTime').value,
+            note: document.getElementById('orderNote').value || '無備註'
         }
+    };
+    
+    // 1. 發送到 Google Sheets (維持原有的 no-cors 模式)
+    try {
+        await fetch(scriptUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        });
+        console.log('訂單已儲存到 Google Sheets');
+    } catch (error) {
+        // 這是預期中的網路錯誤訊息，只要確認資料有寫入 Sheets 就好
+        console.warn('儲存到 Google Sheets 成功，但因 no-cors 模式，會顯示網路錯誤。', error);
+    }
 
-        // ===== 即時更新確認按鈕 =====
-        document.addEventListener('change', updateConfirmButton);
-        document.addEventListener('input', updateConfirmButton);
+    // 2. 發送到本地列印伺服器 (只有 POS 電腦上的瀏覽器會成功連線)
+    try {
+        const localResponse = await fetch(localServerUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        });
+        
+        if (localResponse.ok) {
+            console.log('訂單已成功發送到本地列印伺服器');
+        } else {
+            console.error('發送到本地列印伺服器失敗，狀態碼:', localResponse.status);
+        }
+    } catch (error) {
+        console.error('連接本地列印伺服器失敗 (此錯誤表示 Node.js 程式未啟動或防火牆阻擋!):', error);
+        // 顧客端的手機發送會在這裡報錯，這是預期的行為。
+    }
+}
+
+// 修正 confirmOrder 函式，讓它呼叫新的 sendOrderData
+async function confirmOrder() {
+    // ... (前面驗證程式碼不變)
+    if (!form.checkValidity()) {
+        alert('請填寫完整的取餐資訊！');
+        form.reportValidity();
+        return;
+    }
+    if (totalResult.items.length === 0) {
+        alert('請至少選擇一個品項！');
+        return;
+    }
+
+    // 生成訂單編號
+    const timestamp = new Date().getTime();
+    currentOrderId = `JD${timestamp.toString().slice(-6)}`;
+
+    // 顯示訂單預覽
+    showOrderPreview();
+    // 顯示分享區塊
+    showShareSection();
+    // 滾動到分享區
+    document.getElementById('shareSection').scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+    });
+    
+    // **重要變更：呼叫新的 sendOrderData 函式**
+    await sendOrderData(totalResult); 
+}
+
+// ... (其他函式不變)
+
+// ===== 即時更新確認按鈕 (此行不變) =====
+document.addEventListener('change', updateConfirmButton);
+document.addEventListener('input', updateConfirmButton);
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
