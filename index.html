@@ -972,11 +972,11 @@
             let tomorrow = new Date(today);
             tomorrow.setDate(today.getDate() + 1);
 
-            // 如果今天或明天是星期一，則跳過
-            if (today.getDay() === 1) { // 1代表星期一
-                tomorrow.setDate(today.getDate() + 2); // 跳到星期二
-            } else if (tomorrow.getDay() === 1) {
-                tomorrow.setDate(tomorrow.getDate() + 1); // 跳到星期二
+            // 如果今天或明天是星期日，則跳過
+            if (today.getDay() === 0) { // 0代表星期日
+                tomorrow.setDate(today.getDate() + 1); // 跳到星期一
+            } else if (tomorrow.getDay() ===  ) {
+                tomorrow.setDate(tomorrow.getDate() + 1); // 跳到星期一
             }
 
             // 確保初始日期不是星期一
