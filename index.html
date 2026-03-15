@@ -655,6 +655,28 @@ function updateTimePicker(dateStr) {
     timeInput.value = defaultTime;
 }
 
+    // ===== 儲存到 Google Sheets =====
+async function saveToGoogleSheets(orderData) {
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbwwC6HFuGUo_U_VxRfGgBX1zQbmXAkZUOTe7zul1VQVInZ2ry5-vKM8L4toVdu74F0eaQ/exec';  // ← 確認這是你的真實 Web App URL
+
+    try {
+        await fetch(scriptUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
+        });
+        console.log('訂單已送出到 Google Sheets');
+    } catch (error) {
+        console.error('送單失敗：', error);
+        // 失敗也不要影響使用者
+    }
+}
+
+    
+
 // 清除訂單
 document.getElementById('clearOrder').addEventListener('click', () => {
     if (!confirm('確定清除目前選單？')) return;
@@ -688,8 +710,43 @@ document.getElementById('confirmOrder').addEventListener('click', async () => {
     document.getElementById('shareSection').style.display = 'block';
     document.getElementById('shareSection').scrollIntoView({ behavior: 'smooth' });
 
-    // 可選：送 Google Sheets（保留你原本的邏輯）
-    // await saveToGoogleSheets(...);
+        // 準備要送的訂單資料
+    const orderData = {
+        orderId: orderId,
+        orderTime: new Date().toISOString(),
+        store: STORE_NAME,
+        items: [],
+        total: finalTotal,
+        discount: discount,  // 小菜優惠金額
+        subtotal: subtotal,
+        customer: {
+            name: name,
+            phone: phone,
+            pickupDate: date.replace(/\//g, '-'),
+            pickupTime: time,
+            note: note
+        }
+    };
+
+    // 收集所有選購品項
+    document.querySelectorAll('.item-checkbox:checked').forEach(chk => {
+        const id = chk.id;
+        const item = findItemById(id);
+        if (item) {
+            const qty = parseInt(document.getElementById(`qty-${id}`).value) || 0;
+            const price = parseInt(chk.dataset.price);
+            orderData.items.push({
+                name: item.name,
+                category: item.category,
+                price: price,
+                qty: qty,
+                subtotal: price * qty
+            });
+        }
+    });
+
+    // 真的送出到 Google Sheets
+    await saveToGoogleSheets(orderData);
 });
 
 // 顯示訂單預覽
