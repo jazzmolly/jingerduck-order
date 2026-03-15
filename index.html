@@ -546,8 +546,8 @@
                         <input type="date" id="pickupDate" class="form-input" required>
                     </div>
                     <div style="flex: 1;">
-                        <label class="form-label required" for="pickupTime">取餐時間 <span class="time-note">(營業時間 11:00-19:00)</span></label>
-                        <input type="time" id="pickupTime" class="form-input" min="11:00" max="19:00" required>
+                        <label class="form-label required" for="pickupTime">取餐時間 <span class="time-note">(營業時間 16:30-22:30)</span></label>
+                        <input type="time" id="pickupTime" class="form-input" min="16:30" max="22:30" required>
                     </div>
                 </div>
 
@@ -981,7 +981,7 @@
 
             // 確保初始日期不是星期一
             let initialDate = new Date(today);
-            while (initialDate.getDay() === 1) {
+            while (initialDate.getDay() === 0) {
                 initialDate.setDate(initialDate.getDate() + 1);
             }
             pickupDate.value = initialDate.toISOString().split('T')[0];
@@ -990,11 +990,11 @@
             // 監聽日期變更
             pickupDate.addEventListener('input', function() {
                 const selectedDate = new Date(this.value);
-                // 檢查是否為星期一
+                // 檢查是否為星期日
                 if (selectedDate.getDay() === 1) {
-                    alert('不好意思，我們市場公休，每週一不營業，請選擇其他日期！');
+                    alert('不好意思，我們每週日不營業，請選擇其他日期！');
                     
-                    // 自動跳到隔天 (星期二)
+                    // 自動跳到隔天 (星期一)
                     const nextDay = new Date(selectedDate);
                     nextDay.setDate(selectedDate.getDate() + 1);
                     this.value = nextDay.toISOString().split('T')[0];
@@ -1005,23 +1005,21 @@
             const now = new Date();
             const hours = now.getHours();
             let initialTime;
-            if (hours < 11) {
-                initialTime = "11:00";
-            } else if (hours > 19) {
-                initialTime = "19:00";
+            if (hours < 16) {
+                initialTime = "16:30";
+            } else if (hours > 22) {
+                initialTime = "22:30";
             } else {
                 initialTime = `${hours.toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
             }
 
             // 設定預設取餐時間
-            pickupTime.value = '11:00';
+            pickupTime.value = '16:30';
             
             // 監聽時間變更
-            pickupTime.addEventListener('change', function() {
-                const time = this.value;
-                if (time < '11:00' || time > '19:00') {
-                    alert('取餐時間請選擇 11:00-19:00 之間');
-                    this.value = '11:00';
+            if (time < '16:30' || time > '22:30') {
+            alert('取餐時間請選擇 16:30-22:30 之間');
+            this.value = '16:30';  
                 }
             });
         }
@@ -1231,31 +1229,3 @@ ${itemsText}
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
