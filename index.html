@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>薑薑藥膳鍋 - 九珍薑母鴨 線上點餐</title>
+    <title>薑薑 薑母鴨 - 線上點餐系統</title>
     <style>
         :root {
             --brand: #b22222;
@@ -44,7 +44,7 @@
         h1 {
             margin: 0;
             color: var(--brand);
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             font-weight: 700;
         }
 
@@ -54,7 +54,7 @@
             font-size: 0.95rem;
         }
 
-        /* 菜單表格 - 改用傳統表格結構 */
+        /* 菜單表格 */
         .menu-section {
             margin-bottom: 25px;
         }
@@ -62,8 +62,18 @@
         .menu-title {
             font-size: 1.1rem;
             color: var(--brand);
-            margin: 0 0 15px 0;
+            margin: 0 0 10px 0;
             font-weight: 600;
+        }
+
+        .promo-banner {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--brand);
+            padding: 10px 14px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            color: #333;
         }
 
         .menu-table {
@@ -73,10 +83,9 @@
             border-radius: var(--border-radius);
             overflow: hidden;
             background: white;
-            margin-bottom: 20px; /* 增加表格間距 */
+            margin-bottom: 20px;
         }
         
-        /* 類別標題樣式 */
         .category-row th {
             background-color: #f8f8f8;
             color: var(--brand);
@@ -105,7 +114,7 @@
         .menu-row:last-child {
             border-bottom: none;
         }
-       
+        
         .item-cell {
             padding: 12px 8px;
             vertical-align: middle;
@@ -314,20 +323,16 @@
             border-color: var(--danger);
         }
 
-        .form-input.required::after {
-            content: " *";
-            color: var(--danger);
-        }
-
         .datetime-container {
             display: flex;
             gap: 12px;
-            align-items: end;
+            align-items: flex-end;
         }
 
         .time-note {
             font-size: 0.85rem;
-            color: var(--muted);
+            color: var(--brand);
+            font-weight: bold;
             margin-top: 4px;
         }
 
@@ -415,9 +420,9 @@
             color: #333;
             max-height: 300px;
             overflow-y: auto;
+            text-align: left;
         }
 
-        /* 響應式設計 */
         @media (max-width: 768px) {
             body { padding: 10px; }
             .container { padding: 15px; }
@@ -427,53 +432,31 @@
             .qty-container { min-width: 65px; }
             .qty-btn { width: 26px; height: 26px; font-size: 15px; }
             .qty-input { width: 32px; font-size: 14px; }
-            .form-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .datetime-container {
-                flex-direction: column;
-                gap: 8px;
-                align-items: stretch;
-            }
-
-            .total-section {
-                flex-direction: column;
-                gap: 12px;
-                text-align: center;
-            }
-
-            h1 { font-size: 1.4rem; }
+            .form-grid { grid-template-columns: 1fr; gap: 12px; }
+            .datetime-container { flex-direction: column; gap: 8px; align-items: stretch; }
+            .total-section { flex-direction: column; gap: 12px; text-align: center; }
+            h1 { font-size: 1.5rem; }
         }
 
-        @media (max-width: 480px) {
-            .item-name-cell { font-size: 0.85rem; }
-            .qty-container { min-width: 60px; }
-            .qty-btn { width: 24px; height: 24px; font-size: 14px; }
-            .qty-input { width: 28px; font-size: 13px; }
-        }
-
-        /* 浮動提示框樣式 */
+        /* 浮動提示區域 */
         .promotion-message-popup {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
-            background: var(--brand);
+            background: #222;
             color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            font-weight: 600;
-            font-size: 1rem;
-            white-space: pre-wrap;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            font-size: 0.95rem;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-            pointer-events: none;
-            max-width: 85%;
+            max-width: 90%;
+            width: 400px;
+            border: 2px solid var(--brand);
         }
         
         .promotion-message-popup.visible {
@@ -481,30 +464,47 @@
             visibility: visible;
         }
 
-        /* 禁用日期樣式 */
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            cursor: pointer;
+        .gift-options {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid #444;
         }
-        input[type="date"]:disabled {
-            background-color: #f0f0f0;
-            cursor: not-allowed;
+
+        .gift-options label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #ffeb3b;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div id="promotionMessage" class="promotion-message-popup"></div>
+    <div id="promotionMessage" class="promotion-message-popup">
+        <div id="promoText"></div>
+        <div id="giftOptionContainer" class="gift-options" style="display: none;">
+            <span>請選擇贈品：</span>
+            <label><input type="radio" name="meatGift" value="培根牛" checked> 培根牛</label>
+            <label><input type="radio" name="meatGift" value="梅花豬"> 梅花豬</label>
+        </div>
+    </div>
 
     <div class="container">
         <header>
-            <h1>薑薑藥膳鍋</br>（薑母鴨／養生鍋）</h1>
-            <p class="subtitle">九珍薑母鴨 線上點餐系統</p>
+            <h1>薑薑 薑母鴨</h1>
+            <p class="subtitle">線上點餐系統</p>
         </header>
 
         <section class="menu-section">
             <h2 class="menu-title">🍲 請選擇想要的品項</h2>
-            <h3 style="color: #666; font-size: 1rem; margin-top: -5px;">
-                小菜買5送1（送60小菜）
-            </h3>
+            <div class="promo-banner">
+                🎁 <strong>特別優惠：</strong><br>
+                • 小菜類：<strong>買 5 送 1</strong>（選滿 6 份自動折抵 60 元，請自行於菜單勾選第 6 份）<br>
+                • 肉片類：<strong>買 5 送 1</strong>（全選培根牛可自選贈送培根牛或梅花豬；其餘自動贈送梅花豬）
+            </div>
             
             <table class="menu-table">
                 <thead>
@@ -514,8 +514,7 @@
                         <th class="menu-header">數量</th>
                     </tr>
                 </thead>
-                <tbody id="menuBody">
-                    </tbody>
+                <tbody id="menuBody"></tbody>
             </table>
         </section>
 
@@ -546,8 +545,8 @@
                         <input type="date" id="pickupDate" class="form-input" required>
                     </div>
                     <div style="flex: 1;">
-                        <label class="form-label required" for="pickupTime">取餐時間 <span class="time-note">(營業時間 11:00-19:00)</span></label>
-                        <input type="time" id="pickupTime" class="form-input" min="11:00" max="19:00" required>
+                        <label class="form-label required" for="pickupTime">取餐時間 <span class="time-note" id="timeNote">(營業時間)</span></label>
+                        <input type="time" id="pickupTime" class="form-input" required>
                     </div>
                 </div>
 
@@ -572,12 +571,16 @@
         </section>
 
         <footer style="text-align: center; margin-top: 30px; color: var(--muted); font-size: 0.85rem; padding-top: 20px; border-top: 1px solid #eee;">
-            <p>薑薑藥膳鍋 | 九珍薑母鴨專賣 | 歡迎光臨！</p>
+            <p>薑薑 薑母鴨 | 歡迎光臨！</p>
         </footer>
     </div>
 
     <script>
-        // ===== 菜單資料 - 新增類別 =====
+        // ===== 臨時店休日期設定區 =====
+        // 若有偶爾臨時想店休的日期，請填入下方陣列中，例如 ["2026-10-04", "2026-10-11"]
+        const offDays = [];
+
+        // ===== 菜單資料 =====
         const menuData = [
             {
                 category: "薑母鴨類",
@@ -603,15 +606,14 @@
                     { id: "bean-curd", name: "豆皮", price: 60 },
                     { id: "chinese-dough-sticks", name: "油條", price: 60 },
                     { id: "grilled-mochi", name: "麻吉燒", price: 60 },
-                    { id: "noodles", name: "麻油麵線(現場製作)", price: 60 },                    
+                    { id: "noodles", name: "麻油麵線(現場製作)", price: 60 }
                 ]
             },
-             {
+            {
                 category: "肉片類",
                 items: [
-                    { id: "beef-slices", name: "培根牛", price: 100 },
-                    { id: "pork-slices", name: "梅花豬", price: 90 },
-                    
+                    { id: "beef-slices", name: "培根牛", price: 120 },
+                    { id: "pork-slices", name: "梅花豬", price: 100 }
                 ]
             },        
             {
@@ -623,47 +625,31 @@
                 ]
             }
         ];
-        
-        // ===== 輔助函式：根據 ID 尋找菜單項目 =====
-        function findItemById(itemId) {
-            for (const category of menuData) {
-                const item = category.items.find(i => i.id === itemId);
-                if (item) {
-                    return { ...item, category: category.category };
-                }
-            }
-            return null;
-        }
-        
-        let currentOrderId = null;
-        let promotionTimeoutId = null;
 
-        // ===== 初始化 =====
+        let currentOrderId = null;
+        let selectedMeatGift = "培根牛"; // 全牛肉預設贈品
+
         document.addEventListener('DOMContentLoaded', function() {
             initMenu();
             initDateTime();
             initEventListeners();
-            updateOrderData(); // 初始載入時計算總價
+            updateOrderData();
         });
-        
-        // ===== 初始化菜單 (更新版，能處理類別) =====
+
         function initMenu() {
             const menuBody = document.getElementById('menuBody');
-            menuBody.innerHTML = ''; // 清空現有內容
+            menuBody.innerHTML = '';
 
             menuData.forEach(category => {
-                // 建立類別標題行
                 const categoryRow = document.createElement('tr');
                 categoryRow.className = 'category-row';
                 categoryRow.innerHTML = `<th colspan="3">${category.category}</th>`;
                 menuBody.appendChild(categoryRow);
 
-                // 建立該類別下的所有菜品
                 category.items.forEach(item => {
                     const row = document.createElement('tr');
                     row.className = 'menu-row';
 
-                    // 品名單元格
                     const nameCell = document.createElement('td');
                     nameCell.className = 'item-cell item-name-cell';
                     nameCell.innerHTML = `
@@ -673,12 +659,10 @@
                         </label>
                     `;
 
-                    // 價格單元格
                     const priceCell = document.createElement('td');
                     priceCell.className = 'item-cell item-price-cell';
                     priceCell.textContent = `NT$${item.price}`;
 
-                    // 數量單元格
                     const qtyCell = document.createElement('td');
                     qtyCell.className = 'item-cell item-qty-cell';
                     qtyCell.innerHTML = `
@@ -693,13 +677,11 @@
                     row.appendChild(qtyCell);
                     menuBody.appendChild(row);
 
-                    // 綁定事件
                     bindItemEvents(item.id);
                 });
             });
         }
 
-        // ===== 綁定菜單項目事件 =====
         function bindItemEvents(itemId) {
             const checkbox = document.getElementById(itemId);
             const qtyContainer = document.querySelector(`[data-qty-id="${itemId}"]`);
@@ -707,7 +689,6 @@
             const plusBtn = document.getElementById(`plus-${itemId}`);
             const qtyInput = document.getElementById(`qty-${itemId}`);
             
-            // Checkbox 變更事件
             checkbox.addEventListener('change', function() {
                 const isChecked = this.checked;
                 const currentQty = parseInt(qtyInput.value) || 0;
@@ -717,9 +698,7 @@
                     minusBtn.disabled = false;
                     plusBtn.disabled = false;
                     qtyInput.readOnly = false;
-                    if (currentQty === 0) {
-                        qtyInput.value = 1;
-                    }
+                    if (currentQty === 0) qtyInput.value = 1;
                 } else {
                     qtyContainer.classList.add('disabled');
                     minusBtn.disabled = true;
@@ -727,17 +706,14 @@
                     qtyInput.readOnly = true;
                     qtyInput.value = 0;
                 }
-                
                 updateOrderData();
             });
 
-            // 加減按鈕事件
             minusBtn.addEventListener('click', function() {
                 if (!this.disabled) {
                     let current = parseInt(qtyInput.value) || 0;
                     if (current > 1) {
                         qtyInput.value = current - 1;
-                        updateOrderData();
                     } else if (current === 1) {
                         qtyInput.value = 0;
                         checkbox.checked = false;
@@ -745,8 +721,8 @@
                         minusBtn.disabled = true;
                         plusBtn.disabled = true;
                         qtyInput.readOnly = true;
-                        updateOrderData();
                     }
+                    updateOrderData();
                 }
             });
 
@@ -759,7 +735,6 @@
                 }
             });
 
-            // 手動輸入驗證
             qtyInput.addEventListener('input', function(e) {
                 let value = parseInt(e.target.value);
                 if (isNaN(value) || value < 0) {
@@ -782,12 +757,7 @@
             });
         }
 
-        // ===== 更新訂單資料的函式 =====
-        let totalResult = {
-            items: [],
-            total: 0,
-            customer: {}
-        };
+        let totalResult = { items: [], total: 0, meatGifts: [] };
         
         function updateOrderData() {
             const selectedItems = [];
@@ -813,119 +783,102 @@
             });
             
             totalResult.items = selectedItems;
-            
             calculateTotal();
             displayPromotionMessage();
             updateConfirmButton();
         }
-        
-        // ===== 計算總金額 (修正版，包含兩種優惠) =====
+
         function calculateTotal() {
             let finalTotal = 0;
             let sideDishCount = 0;
-            let meatCount = 0;
 
-            // 1. 先計算原始總價和各品項數量
             totalResult.items.forEach(item => {
                 finalTotal += item.price * item.qty;
-                if (item.category === '小菜類') {
-                    sideDishCount += item.qty;
-                }
-                if (item.category === '單點肉類') {
-                    meatCount += item.qty;
-                }
+                if (item.category === '小菜類') sideDishCount += item.qty;
             });
             
-            // 2. 計算並套用「小菜」折扣
+            // 小菜買5送1：每滿6份扣60元
             const freeSideDishes = Math.floor(sideDishCount / 6);
             const sideDishDiscount = freeSideDishes * 60;
-            
-            if (sideDishDiscount > 0) {
-                finalTotal -= sideDishDiscount;
-            }
+            if (sideDishDiscount > 0) finalTotal -= sideDishDiscount;
 
-            // 3. 計算並套用「肉品」折扣
-            const freeMeats = Math.floor(meatCount / 6);
-            const meatDiscount = freeMeats * 90;
-            
-            if (meatDiscount > 0) {
-                finalTotal -= meatDiscount;
-            }
-            
             totalResult.total = finalTotal;
             updateOrderDisplay();
         }
 
-        // ===== 顯示即時優惠提醒訊息 (修正版) =====
         function displayPromotionMessage() {
-            const messageElement = document.getElementById('promotionMessage');
+            const popup = document.getElementById('promotionMessage');
+            const promoText = document.getElementById('promoText');
+            const giftContainer = document.getElementById('giftOptionContainer');
+            
             let sideDishCount = 0;
-            let meatCount = 0;
-            let messages = [];
+            let beefCount = 0;
+            let porkCount = 0;
 
             totalResult.items.forEach(item => {
-                if (item.category === '小菜類') {
-                    sideDishCount += item.qty;
-                }
-                if (item.category === '單點肉類') {
-                    meatCount += item.qty;
-                }
+                if (item.category === '小菜類') sideDishCount += item.qty;
+                if (item.id === 'beef-slices') beefCount += item.qty;
+                if (item.id === 'pork-slices') porkCount += item.qty;
             });
+
+            const totalMeatCount = beefCount + porkCount;
+            let messages = [];
+            let showGiftOption = false;
+            totalResult.meatGifts = [];
 
             // 小菜提醒
             if (sideDishCount > 0) {
                 if (sideDishCount % 6 === 5) {
-                    messages.push("您己達到小菜買5送1優惠，請再免費選1份小菜！");
-                } else if (sideDishCount % 6 === 0) {
-                    messages.push("👍 小菜已達成買5送1優惠！");
+                    messages.push("小菜已滿 5 份！請再於選單免費選 1 份小菜（買5送1）。");
+                } else if (sideDishCount >= 6) {
+                    messages.push(`👍 已套用小菜買5送1優惠（已折抵 ${Math.floor(sideDishCount/6)*60} 元）！`);
                 }
             }
 
-            // 肉品提醒
-            if (meatCount > 0) {
-                if (meatCount % 6 === 5) {
-                    messages.push("您己達到肉品買5送1優惠，請再免費選1份90元肉品！");
-                } else if (meatCount % 6 === 0) {
-                    messages.push("👍 肉品已達成買5送1優惠！");
+            // 肉片買5送1邏輯
+            if (totalMeatCount >= 5) {
+                const giftSets = Math.floor(totalMeatCount / 5);
+                
+                // 判斷是否為「全牛肉」
+                if (beefCount > 0 && porkCount === 0) {
+                    messages.push("🎉 您已達到肉品買5送1優惠！請選擇您的免費贈品：");
+                    showGiftOption = true;
+                    for (let i = 0; i < giftSets; i++) {
+                        totalResult.meatGifts.push(selectedMeatGift);
+                    }
+                } else {
+                    // 綜合或全豬肉：直接送梅花豬
+                    messages.push("🎉 您已達到肉品買5送1優惠！店家免費送您一份梅花豬。");
+                    showGiftOption = false;
+                    for (let i = 0; i < giftSets; i++) {
+                        totalResult.meatGifts.push("梅花豬");
+                    }
                 }
-            }
-
-            // 顯示或隱藏浮動視窗
-            if (messages.length > 0) {
-                messageElement.textContent = messages.join('\n'); // 使用換行符號
-                messageElement.classList.add('visible');
-                // 清除舊的計時器，避免重複
-                if (promotionTimeoutId) {
-                    clearTimeout(promotionTimeoutId);
-                }
-                // 設定新的計時器，3秒後隱藏
-                promotionTimeoutId = setTimeout(() => {
-                    messageElement.classList.remove('visible');
-                }, 3000);
             } else {
-                // 如果沒有訊息，確保視窗隱藏
-                messageElement.classList.remove('visible');
-                if (promotionTimeoutId) {
-                    clearTimeout(promotionTimeoutId);
-                }
+                showGiftOption = false;
+            }
+
+            if (messages.length > 0) {
+                promoText.innerHTML = messages.join('<br>');
+                giftContainer.style.display = showGiftOption ? 'flex' : 'none';
+                popup.classList.add('visible');
+            } else {
+                popup.classList.remove('visible');
+                giftContainer.style.display = 'none';
             }
         }
 
-        // ===== 更新網頁顯示 =====
         function updateOrderDisplay() {
             document.getElementById('totalAmount').textContent = `NT$${totalResult.total.toLocaleString()}`;
         }
 
-        // ===== 更新確認按鈕狀態 =====
         function updateConfirmButton() {
             const form = document.getElementById('orderForm');
             const isFormValid = form.checkValidity();
             const hasItems = totalResult.items.length > 0;
-            const confirmBtn = document.getElementById('confirmOrder');
-            confirmBtn.disabled = !(hasItems && isFormValid);
+            document.getElementById('confirmOrder').disabled = !(hasItems && isFormValid);
         }
 
-        // ===== 表單驗證 =====
         function validateInput(e) {
             const input = e.target;
             const isValid = input.checkValidity();
@@ -947,13 +900,21 @@
             updateConfirmButton();
         }
 
-        // ===== 事件監聽器 =====
         function initEventListeners() {
             document.getElementById('clearOrder').addEventListener('click', clearOrder);
             document.getElementById('confirmOrder').addEventListener('click', confirmOrder);
             document.getElementById('shareToLine').addEventListener('click', shareToLine);
             document.getElementById('copyOrder').addEventListener('click', copyOrder);
             document.getElementById('backToMenu').addEventListener('click', backToMenu);
+
+            // 監聽全牛肉贈品選項按鈕
+            const giftRadios = document.querySelectorAll('input[name="meatGift"]');
+            giftRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    selectedMeatGift = this.value;
+                    displayPromotionMessage();
+                });
+            });
 
             const formInputs = document.querySelectorAll('.form-input[required]');
             formInputs.forEach(input => {
@@ -962,71 +923,84 @@
             });
         }
 
-        // ===== 初始化日期時間 (修正版) =====
+        // ===== 時間與公休日邏輯 =====
+        function updateTimeRangeByDate(selectedDateObj) {
+            const pickupTime = document.getElementById('pickupTime');
+            const timeNote = document.getElementById('timeNote');
+            const dayOfWeek = selectedDateObj.getDay();
+
+            let minTime, maxTime, noteText;
+
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                minTime = "11:00";
+                maxTime = "22:00";
+                noteText = "(假日營業時間 11:00-22:00)";
+            } else {
+                minTime = "18:00";
+                maxTime = "22:00";
+                noteText = "(平日營業時間 18:00-22:00)";
+            }
+
+            pickupTime.min = minTime;
+            pickupTime.max = maxTime;
+            timeNote.textContent = noteText;
+
+            if (pickupTime.value) {
+                if (pickupTime.value < minTime || pickupTime.value > maxTime) {
+                    pickupTime.value = minTime;
+                }
+            } else {
+                pickupTime.value = minTime;
+            }
+        }
+
         function initDateTime() {
             const pickupDate = document.getElementById('pickupDate');
             const pickupTime = document.getElementById('pickupTime');
             
-            // 處理日期：鎖定星期一
-            const today = new Date();
-            let tomorrow = new Date(today);
-            tomorrow.setDate(today.getDate() + 1);
-
-            // 如果今天或明天是星期一，則跳過
-            if (today.getDay() === 1) { // 1代表星期一
-                tomorrow.setDate(today.getDate() + 2); // 跳到星期二
-            } else if (tomorrow.getDay() === 1) {
-                tomorrow.setDate(tomorrow.getDate() + 1); // 跳到星期二
-            }
-
-            // 確保初始日期不是星期一
-            let initialDate = new Date(today);
-            while (initialDate.getDay() === 1) {
+            let initialDate = new Date();
+            if (initialDate.getDay() === 1) {
                 initialDate.setDate(initialDate.getDate() + 1);
             }
-            pickupDate.value = initialDate.toISOString().split('T')[0];
-            pickupDate.min = initialDate.toISOString().split('T')[0];
 
-            // 監聽日期變更
-            pickupDate.addEventListener('input', function() {
-                const selectedDate = new Date(this.value);
-                // 檢查是否為星期一
+            const initialDateStr = initialDate.toISOString().split('T')[0];
+            pickupDate.min = new Date().toISOString().split('T')[0];
+            pickupDate.value = initialDateStr;
+
+            updateTimeRangeByDate(initialDate);
+
+            pickupDate.addEventListener('change', function() {
+                if (!this.value) return;
+                const parts = this.value.split('-');
+                const selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
+
+                // 檢查固定週一公休
                 if (selectedDate.getDay() === 1) {
-                    alert('不好意思，我們市場公休，每週一不營業，請選擇其他日期！');
-                    
-                    // 自動跳到隔天 (星期二)
-                    const nextDay = new Date(selectedDate);
-                    nextDay.setDate(selectedDate.getDate() + 1);
-                    this.value = nextDay.toISOString().split('T')[0];
+                    alert('不好意思，每週一公休，請選擇其他日期！');
+                    selectedDate.setDate(selectedDate.getDate() + 1);
+                    this.value = selectedDate.toISOString().split('T')[0];
                 }
+
+                // 檢查臨時店休清單
+                if (offDays.includes(this.value)) {
+                    alert('不好意思，當天店家臨時公休，請選擇其他日期！');
+                    selectedDate.setDate(selectedDate.getDate() + 1);
+                    this.value = selectedDate.toISOString().split('T')[0];
+                }
+
+                updateTimeRangeByDate(selectedDate);
             });
 
-            // 處理時間：設定為24小時制
-            const now = new Date();
-            const hours = now.getHours();
-            let initialTime;
-            if (hours < 11) {
-                initialTime = "11:00";
-            } else if (hours > 19) {
-                initialTime = "19:00";
-            } else {
-                initialTime = `${hours.toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-            }
-
-            // 設定預設取餐時間
-            pickupTime.value = '11:00';
-            
-            // 監聽時間變更
             pickupTime.addEventListener('change', function() {
-                const time = this.value;
-                if (time < '11:00' || time > '19:00') {
-                    alert('取餐時間請選擇 11:00-19:00 之間');
-                    this.value = '11:00';
+                const min = this.min;
+                const max = this.max;
+                if (this.value < min || this.value > max) {
+                    alert(`取餐時間請選擇營業時間內（${min} - ${max}）`);
+                    this.value = min;
                 }
             });
         }
 
-        // ===== 清除訂單 =====
         function clearOrder() {
             if (confirm('確定要清除目前選單嗎？')) {
                 menuData.forEach(category => {
@@ -1053,7 +1027,6 @@
             }
         }
 
-        // ===== 確認訂單 =====
         async function confirmOrder() {
             const form = document.getElementById('orderForm');
             if (!form.checkValidity()) {
@@ -1066,27 +1039,20 @@
                 return;
             }
 
-            // 生成訂單編號
             const timestamp = new Date().getTime();
             currentOrderId = `JD${timestamp.toString().slice(-6)}`;
 
-            // 顯示訂單預覽
             showOrderPreview();
-
-            // 顯示分享區塊
             showShareSection();
             
-            // 滾動到分享區
             document.getElementById('shareSection').scrollIntoView({
                 behavior: 'smooth',
                 block: 'center'
             });
 
-            // 發送到 Google Sheets（非同步）
             await saveToGoogleSheets(totalResult);
         }
 
-        // ===== 顯示訂單預覽 =====
         function showOrderPreview() {
             const now = new Date();
             const orderTime = now.toLocaleString('zh-TW', {
@@ -1104,18 +1070,26 @@
             const orderNote = document.getElementById('orderNote').value || '無備註';
             const pickupDateTime = `${pickupDate.replace(/-/g, '/')} ${pickupTime}`;
 
-            let itemsText = totalResult.items.map(item =>
+            let itemsTextList = totalResult.items.map(item =>
                 `• ${item.name} × ${item.qty} → NT$${(item.price * item.qty).toLocaleString()}`
-            ).join('\n');
+            );
+
+            // 若有肉片贈品，自動列出於明細中
+            if (totalResult.meatGifts && totalResult.meatGifts.length > 0) {
+                totalResult.meatGifts.forEach(giftName => {
+                    itemsTextList.push(`🎁 贈品：${giftName} × 1 (送${giftName}) → NT$0`);
+                });
+            }
+
+            let itemsText = itemsTextList.join('\n');
             
-            // 如果有折扣，將其加入明細中
             const totalBeforeDiscount = totalResult.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
             const totalDiscount = totalBeforeDiscount - totalResult.total;
             if (totalDiscount > 0) {
-                itemsText += `\n\n優惠折扣：-NT$${totalDiscount.toLocaleString()}`;
+                itemsText += `\n\n小菜優惠折扣：-NT$${totalDiscount.toLocaleString()}`;
             }
 
-            const previewText = `🔔 薑薑鴨肉小館 新訂單 #${currentOrderId}
+            const previewText = `🔔 薑薑 薑母鴨 新訂單 #${currentOrderId}
 ═══════════════════════
 訂單時間：${orderTime}
 
@@ -1130,25 +1104,22 @@ ${itemsText}
 取餐時間：${pickupDateTime}
 備註：${orderNote}
 
-📍 店家：薑薑 鴨肉小館
+📍 店家：薑薑 薑母鴨
 請於取餐時間前到店領取，謝謝惠顧！`;
 
             document.getElementById('orderPreview').textContent = previewText;
         }
 
-        // ===== 顯示分享區塊 =====
         function showShareSection() {
             document.getElementById('confirmOrder').style.display = 'none';
             document.getElementById('shareSection').style.display = 'block';
         }
 
-        // ===== 隱藏分享區塊 =====
         function hideShareSection() {
             document.getElementById('confirmOrder').style.display = 'block';
             document.getElementById('shareSection').style.display = 'none';
         }
 
-        // ===== 分享到 LINE =====
         function shareToLine() {
             const orderPreview = document.getElementById('orderPreview').textContent;
             const encodedText = encodeURIComponent(orderPreview);
@@ -1157,7 +1128,6 @@ ${itemsText}
             alert('訂單已開啟 LINE，請選擇傳送給店家 (@198usxgc) 或其他聯絡人！');
         }
 
-        // ===== 複製訂單 =====
         async function copyOrder() {
             const orderPreview = document.getElementById('orderPreview').textContent;
             try {
@@ -1176,13 +1146,11 @@ ${itemsText}
             }
         }
 
-        // ===== 返回選單 =====
         function backToMenu() {
             hideShareSection();
             document.getElementById('confirmOrder').style.display = 'block';
         }
 
-        // ===== 儲存到 Google Sheets =====
         async function saveToGoogleSheets(totalResult) {
             const scriptUrl = 'https://script.google.com/macros/s/AKfycbwwC6HFuGUo_U_VxRfGgBX1zQbmXAkZUOTe7zul1VQVInZ2ry5-vKM8L4toVdu74F0eaQ/exec';
 
@@ -1192,13 +1160,26 @@ ${itemsText}
             }
 
             try {
+                // 將贈品加入 items 傳給後端備查
+                let sendItems = totalResult.items.map(item => ({
+                    ...item,
+                    subtotal: item.price * item.qty
+                }));
+
+                if (totalResult.meatGifts && totalResult.meatGifts.length > 0) {
+                    totalResult.meatGifts.forEach(giftName => {
+                        sendItems.push({
+                            name: `🎁 贈品：${giftName} (送${giftName})`,
+                            qty: 1,
+                            subtotal: 0
+                        });
+                    });
+                }
+
                 const orderData = {
                     orderId: currentOrderId,
                     orderTime: new Date().toISOString(),
-                    items: totalResult.items.map(item => ({
-                        ...item,
-                        subtotal: item.price * item.qty
-                    })),
+                    items: sendItems,
                     total: totalResult.total,
                     customer: {
                         name: document.getElementById('customerName').value,
@@ -1209,9 +1190,9 @@ ${itemsText}
                     }
                 };
 
-                const response = await fetch(scriptUrl, {
+                await fetch(scriptUrl, {
                     method: 'POST',
-                    mode: 'no-cors', // Google Apps Script 需要 no-cors
+                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -1221,11 +1202,9 @@ ${itemsText}
                 console.log('訂單已儲存到 Google Sheets');
             } catch (error) {
                 console.error('儲存到 Google Sheets 失敗：', error);
-                // 即使失敗也不影響主要流程
             }
         }
 
-        // ===== 即時更新確認按鈕 =====
         document.addEventListener('change', updateConfirmButton);
         document.addEventListener('input', updateConfirmButton);
     </script>
