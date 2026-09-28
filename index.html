@@ -438,8 +438,8 @@
             h1 { font-size: 1.5rem; }
         }
 
-        /* 浮動提示區域 */
-        .promotion-message-popup {
+        /* 1. 小菜提示視窗 (獨立) */
+        .side-dish-popup {
             position: fixed;
             bottom: 20px;
             left: 50%;
@@ -447,9 +447,35 @@
             z-index: 1000;
             background: #222;
             color: white;
-            padding: 15px 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-size: 0.95rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+            max-width: 90%;
+            width: 380px;
+            border-left: 5px solid var(--success);
+            pointer-events: none;
+        }
+        .side-dish-popup.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 2. 肉品選擇視窗 (獨立，需按確定才關閉) */
+        .meat-gift-popup {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1010;
+            background: #1a1a1a;
+            color: white;
+            padding: 16px 20px;
             border-radius: 10px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.4);
             font-size: 0.95rem;
             opacity: 0;
             visibility: hidden;
@@ -458,8 +484,7 @@
             width: 400px;
             border: 2px solid var(--brand);
         }
-        
-        .promotion-message-popup.visible {
+        .meat-gift-popup.visible {
             opacity: 1;
             visibility: visible;
         }
@@ -469,8 +494,8 @@
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            margin-top: 10px;
-            padding-top: 8px;
+            margin-top: 12px;
+            padding-top: 10px;
             border-top: 1px solid #444;
         }
 
@@ -487,33 +512,51 @@
             background: var(--brand);
             color: white;
             border: none;
-            padding: 4px 12px;
+            padding: 6px 16px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             white-space: nowrap;
         }
 
         .promo-confirm-btn:hover {
             background: #a11e1e;
         }
+
+        .reopen-gift-btn {
+            display: inline-block;
+            margin-top: 5px;
+            background: #ffeb3b;
+            color: #222;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <!-- 浮動提示元件 -->
-    <div id="promotionMessage" class="promotion-message-popup">
-        <div id="promoText"></div>
+    <!-- 1. 小菜獨立提示視窗 -->
+    <div id="sideDishPopup" class="side-dish-popup">
+        <div id="sideDishText"></div>
+    </div>
+
+    <!-- 2. 肉品獨立選擇視窗 -->
+    <div id="meatPopup" class="meat-gift-popup">
+        <div id="meatText"></div>
         <div id="giftOptionContainer" class="gift-options" style="display: none;">
-            <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="display: flex; gap: 12px; align-items: center;">
                 <span>贈品：</span>
                 <label><input type="radio" name="meatGift" value="培根牛" checked> 培根牛</label>
                 <label><input type="radio" name="meatGift" value="梅花豬"> 梅花豬</label>
             </div>
-            <button type="button" class="promo-confirm-btn" id="closePromoBtn">確定</button>
+            <button type="button" class="promo-confirm-btn" id="closeMeatBtn">確定</button>
         </div>
-        <div id="simpleCloseContainer" style="text-align: right; margin-top: 8px; display: none;">
-            <button type="button" class="promo-confirm-btn" id="closeSimplePromoBtn">確定</button>
+        <div id="simpleCloseContainer" style="text-align: right; margin-top: 10px; display: none;">
+            <button type="button" class="promo-confirm-btn" id="closeSimpleMeatBtn">確定</button>
         </div>
     </div>
 
@@ -529,6 +572,9 @@
                 🎁 <strong>特別優惠：</strong><br>
                 • 小菜類：<strong>買 5 送 1</strong>（選滿 6 份自動折抵 60 元，請自行於菜單勾選第 6 份）<br>
                 • 肉片類：<strong>買 5 送 1</strong>（全選培根牛可自選贈送培根牛或梅花豬；其餘自動贈送梅花豬）
+                <div id="reopenGiftArea" style="display: none; margin-top: 6px;">
+                    <button type="button" class="reopen-gift-btn" id="reopenGiftBtn">🎁 重新選擇肉品贈品</button>
+                </div>
             </div>
             
             <table class="menu-table">
@@ -606,8 +652,9 @@
 
         // ===== 全域變數 =====
         let currentOrderId = null;
-        let selectedMeatGift = "培根牛"; // 全牛肉時預設贈品
-        let promoTimeoutId = null;
+        let selectedMeatGift = "培根牛"; // 全牛肉預設贈品
+        let sideDishTimeoutId = null;
+        let meatGiftUserClosed = false; // 紀錄顧客是否手動按下確定關閉過肉品視窗
 
         // ===== 菜單資料 =====
         const menuData = [
@@ -814,7 +861,8 @@
             
             totalResult.items = selectedItems;
             calculateTotal();
-            displayPromotionMessage();
+            handleSideDishPromotion();
+            handleMeatPromotion();
             updateConfirmButton();
         }
 
@@ -837,75 +885,92 @@
             updateOrderDisplay();
         }
 
-        // ===== 顯示即時優惠提醒訊息 =====
-        function displayPromotionMessage() {
-            const popup = document.getElementById('promotionMessage');
-            const promoText = document.getElementById('promoText');
-            const giftContainer = document.getElementById('giftOptionContainer');
-            const simpleCloseContainer = document.getElementById('simpleCloseContainer');
+        // ===== 1. 獨立處理小菜提醒 (3.5秒自動消失) =====
+        function handleSideDishPromotion() {
+            const sideDishPopup = document.getElementById('sideDishPopup');
+            const sideDishText = document.getElementById('sideDishText');
             
             let sideDishCount = 0;
+            totalResult.items.forEach(item => {
+                if (item.category === '小菜類') sideDishCount += item.qty;
+            });
+
+            if (sideDishCount > 0) {
+                let msg = "";
+                if (sideDishCount % 6 === 5) {
+                    msg = "小菜已滿 5 份！請再於選單免費選 1 份小菜（買5送1）。";
+                } else if (sideDishCount >= 6) {
+                    msg = `👍 已套用小菜買5送1優惠（已折抵 ${Math.floor(sideDishCount/6)*60} 元）！`;
+                }
+
+                if (msg !== "") {
+                    sideDishText.textContent = msg;
+                    sideDishPopup.classList.add('visible');
+
+                    if (sideDishTimeoutId) clearTimeout(sideDishTimeoutId);
+                    sideDishTimeoutId = setTimeout(() => {
+                        sideDishPopup.classList.remove('visible');
+                    }, 3500);
+                } else {
+                    sideDishPopup.classList.remove('visible');
+                }
+            } else {
+                sideDishPopup.classList.remove('visible');
+            }
+        }
+
+        // ===== 2. 獨立處理肉品選擇 (不自動消失，按確定才關閉) =====
+        function handleMeatPromotion() {
+            const meatPopup = document.getElementById('meatPopup');
+            const meatText = document.getElementById('meatText');
+            const giftContainer = document.getElementById('giftOptionContainer');
+            const simpleCloseContainer = document.getElementById('simpleCloseContainer');
+            const reopenGiftArea = document.getElementById('reopenGiftArea');
+
             let beefCount = 0;
             let porkCount = 0;
 
             totalResult.items.forEach(item => {
-                if (item.category === '小菜類') sideDishCount += item.qty;
                 if (item.id === 'beef-slices') beefCount += item.qty;
                 if (item.id === 'pork-slices') porkCount += item.qty;
             });
 
             const totalMeatCount = beefCount + porkCount;
-            let messages = [];
-            let showGiftOption = false;
             totalResult.meatGifts = [];
 
-            // 小菜提醒
-            if (sideDishCount > 0) {
-                if (sideDishCount % 6 === 5) {
-                    messages.push("小菜已滿 5 份！請再於選單免費選 1 份小菜（買5送1）。");
-                } else if (sideDishCount >= 6) {
-                    messages.push(`👍 已套用小菜買5送1優惠（已折抵 ${Math.floor(sideDishCount/6)*60} 元）！`);
-                }
-            }
-
-            // 肉片買5送1邏輯
             if (totalMeatCount >= 5) {
                 const giftSets = Math.floor(totalMeatCount / 5);
-                
-                // 判斷是否為「全牛肉」
+                reopenGiftArea.style.display = 'block'; // 顯示重新開啟選擇面板按鈕
+
                 if (beefCount > 0 && porkCount === 0) {
-                    messages.push("🎉 您已達到肉品買5送1優惠！請選擇您的免費贈品：");
-                    showGiftOption = true;
+                    // 全牛肉：可選擇贈品
+                    meatText.innerHTML = "🎉 您已達到肉品買5送1優惠！請選擇您的免費贈品：";
+                    giftContainer.style.display = 'flex';
+                    simpleCloseContainer.style.display = 'none';
+
                     for (let i = 0; i < giftSets; i++) {
                         totalResult.meatGifts.push(selectedMeatGift);
                     }
                 } else {
                     // 綜合或全豬肉：直接送梅花豬
-                    messages.push("🎉 您已達到肉品買5送1優惠！店家免費送您一份梅花豬。");
-                    showGiftOption = false;
+                    meatText.innerHTML = "🎉 您已達到肉品買5送1優惠！店家免費送您一份梅花豬。";
+                    giftContainer.style.display = 'none';
+                    simpleCloseContainer.style.display = 'block';
+
                     for (let i = 0; i < giftSets; i++) {
                         totalResult.meatGifts.push("梅花豬");
                     }
                 }
-            } else {
-                showGiftOption = false;
-            }
 
-            if (messages.length > 0) {
-                promoText.innerHTML = messages.join('<br>');
-                giftContainer.style.display = showGiftOption ? 'flex' : 'none';
-                simpleCloseContainer.style.display = showGiftOption ? 'none' : 'block';
-                popup.classList.add('visible');
-
-                if (promoTimeoutId) clearTimeout(promoTimeoutId);
-                promoTimeoutId = setTimeout(() => {
-                    popup.classList.remove('visible');
-                }, 6000);
+                // 只有在顧客「尚未按確定關閉過」的情況下自動開窗
+                if (!meatGiftUserClosed) {
+                    meatPopup.classList.add('visible');
+                }
             } else {
-                popup.classList.remove('visible');
-                giftContainer.style.display = 'none';
-                simpleCloseContainer.style.display = 'none';
-                if (promoTimeoutId) clearTimeout(promoTimeoutId);
+                // 未滿5份肉：重置狀態並隱藏
+                meatGiftUserClosed = false;
+                meatPopup.classList.remove('visible');
+                reopenGiftArea.style.display = 'none';
             }
         }
 
@@ -952,20 +1017,28 @@
             document.getElementById('copyOrder').addEventListener('click', copyOrder);
             document.getElementById('backToMenu').addEventListener('click', backToMenu);
 
-            // 關閉浮動提示按鈕事件
-            document.getElementById('closePromoBtn').addEventListener('click', function() {
-                document.getElementById('promotionMessage').classList.remove('visible');
+            // 關閉肉品選擇彈窗 (點確定後記錄關閉狀態)
+            document.getElementById('closeMeatBtn').addEventListener('click', function() {
+                document.getElementById('meatPopup').classList.remove('visible');
+                meatGiftUserClosed = true;
             });
-            document.getElementById('closeSimplePromoBtn').addEventListener('click', function() {
-                document.getElementById('promotionMessage').classList.remove('visible');
+            document.getElementById('closeSimpleMeatBtn').addEventListener('click', function() {
+                document.getElementById('meatPopup').classList.remove('visible');
+                meatGiftUserClosed = true;
             });
 
-            // 監聽全牛肉贈品選項按鈕
+            // 重新開啟肉品贈品選擇面板按鈕
+            document.getElementById('reopenGiftBtn').addEventListener('click', function() {
+                meatGiftUserClosed = false;
+                document.getElementById('meatPopup').classList.add('visible');
+            });
+
+            // 監聽全牛肉贈品選項單選鈕
             const giftRadios = document.querySelectorAll('input[name="meatGift"]');
             giftRadios.forEach(radio => {
                 radio.addEventListener('change', function() {
                     selectedMeatGift = this.value;
-                    displayPromotionMessage();
+                    handleMeatPromotion();
                 });
             });
 
@@ -1074,6 +1147,7 @@
                     });
                 });
                 document.getElementById('orderForm').reset();
+                meatGiftUserClosed = false;
                 initDateTime();
                 updateOrderData();
                 hideShareSection();
