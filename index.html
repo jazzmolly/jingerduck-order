@@ -423,6 +423,42 @@
             text-align: left;
         }
 
+        /* 3. 醒目警告提醒跳閃效果 */
+        .important-warning-box {
+            margin-top: 18px;
+            padding: 12px 16px;
+            background: #fffbcf;
+            color: #b22222;
+            border: 3px solid #ff0000;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            font-weight: bold;
+            display: inline-block;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+            animation: pulseFlash 1.2s infinite ease-in-out;
+        }
+
+        @keyframes pulseFlash {
+            0% {
+                transform: scale(1);
+                border-color: #ff0000;
+                box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+                background-color: #fffbcf;
+            }
+            50% {
+                transform: scale(1.03);
+                border-color: #ffcc00;
+                box-shadow: 0 0 20px rgba(255, 204, 0, 0.9);
+                background-color: #ffffff;
+            }
+            100% {
+                transform: scale(1);
+                border-color: #ff0000;
+                box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+                background-color: #fffbcf;
+            }
+        }
+
         @media (max-width: 768px) {
             body { padding: 10px; }
             .container { padding: 15px; }
@@ -438,7 +474,7 @@
             h1 { font-size: 1.5rem; }
         }
 
-        /* 1. 小菜提示視窗 (獨立) */
+        /* 1. 小菜獨立提示視窗 */
         .side-dish-popup {
             position: fixed;
             bottom: 20px;
@@ -464,7 +500,7 @@
             visibility: visible;
         }
 
-        /* 2. 肉品選擇視窗 (獨立，需按確定才關閉) */
+        /* 2. 肉品獨立選擇視窗 */
         .meat-gift-popup {
             position: fixed;
             bottom: 80px;
@@ -637,7 +673,11 @@
                 <a href="#" id="shareToLine" class="share-btn">📱 分享給店家LINE</a>
                 <button id="copyOrder" class="share-btn">📋 複製訂單</button>
                 <button id="backToMenu" class="share-btn danger">🔄 返回選單</button><br>
-                將訂單分享給店家的官方帳號（@198usxgc），才算完成訂單哦！
+                
+                <!-- 霓虹動態醒目提醒框 -->
+                <div class="important-warning-box">
+                    ⚠️ 將訂單分享給店家的官方帳號（@198usxgc），才算完成訂單哦！
+                </div>
             </div>
         </section>
 
@@ -654,6 +694,7 @@
         let currentOrderId = null;
         let selectedMeatGift = "培根牛"; // 全牛肉預設贈品
         let sideDishTimeoutId = null;
+        let lastSideDishState = ""; // 避免重複跳出小菜提示
         let meatGiftUserClosed = false; // 紀錄顧客是否手動按下確定關閉過肉品視窗
 
         // ===== 菜單資料 =====
@@ -885,7 +926,7 @@
             updateOrderDisplay();
         }
 
-        // ===== 1. 獨立處理小菜提醒 (3.5秒自動消失) =====
+        // ===== 1. 獨立處理小菜提醒 (防重複彈出) =====
         function handleSideDishPromotion() {
             const sideDishPopup = document.getElementById('sideDishPopup');
             const sideDishText = document.getElementById('sideDishText');
@@ -895,31 +936,35 @@
                 if (item.category === '小菜類') sideDishCount += item.qty;
             });
 
+            let currentState = "";
             if (sideDishCount > 0) {
-                let msg = "";
                 if (sideDishCount % 6 === 5) {
-                    msg = "小菜已滿 5 份！請再於選單免費選 1 份小菜（買5送1）。";
+                    currentState = `prompt-${sideDishCount}`;
                 } else if (sideDishCount >= 6) {
-                    msg = `👍 已套用小菜買5送1優惠（已折抵 ${Math.floor(sideDishCount/6)*60} 元）！`;
+                    currentState = `applied-${Math.floor(sideDishCount/6)}`;
                 }
+            }
 
-                if (msg !== "") {
-                    sideDishText.textContent = msg;
-                    sideDishPopup.classList.add('visible');
+            // 狀態完全沒變時，不再重複洗版彈窗
+            if (currentState === lastSideDishState) return;
+            lastSideDishState = currentState;
 
-                    if (sideDishTimeoutId) clearTimeout(sideDishTimeoutId);
-                    sideDishTimeoutId = setTimeout(() => {
-                        sideDishPopup.classList.remove('visible');
-                    }, 3500);
-                } else {
-                    sideDishPopup.classList.remove('visible');
-                }
+            if (currentState.startsWith('prompt')) {
+                sideDishText.textContent = "小菜已滿 5 份！請再於選單免費選 1 份小菜（買5送1）。";
+                sideDishPopup.classList.add('visible');
+                if (sideDishTimeoutId) clearTimeout(sideDishTimeoutId);
+                sideDishTimeoutId = setTimeout(() => { sideDishPopup.classList.remove('visible'); }, 3500);
+            } else if (currentState.startsWith('applied')) {
+                sideDishText.textContent = `👍 已套用小菜買5送1優惠（已折抵 ${Math.floor(sideDishCount/6)*60} 元）！`;
+                sideDishPopup.classList.add('visible');
+                if (sideDishTimeoutId) clearTimeout(sideDishTimeoutId);
+                sideDishTimeoutId = setTimeout(() => { sideDishPopup.classList.remove('visible'); }, 3500);
             } else {
                 sideDishPopup.classList.remove('visible');
             }
         }
 
-        // ===== 2. 獨立處理肉品選擇 (不自動消失，按確定才關閉) =====
+        // ===== 2. 獨立處理肉品選擇 (按確定才關閉，不自動消失) =====
         function handleMeatPromotion() {
             const meatPopup = document.getElementById('meatPopup');
             const meatText = document.getElementById('meatText');
@@ -940,7 +985,7 @@
 
             if (totalMeatCount >= 5) {
                 const giftSets = Math.floor(totalMeatCount / 5);
-                reopenGiftArea.style.display = 'block'; // 顯示重新開啟選擇面板按鈕
+                reopenGiftArea.style.display = 'block';
 
                 if (beefCount > 0 && porkCount === 0) {
                     // 全牛肉：可選擇贈品
@@ -962,12 +1007,10 @@
                     }
                 }
 
-                // 只有在顧客「尚未按確定關閉過」的情況下自動開窗
                 if (!meatGiftUserClosed) {
                     meatPopup.classList.add('visible');
                 }
             } else {
-                // 未滿5份肉：重置狀態並隱藏
                 meatGiftUserClosed = false;
                 meatPopup.classList.remove('visible');
                 reopenGiftArea.style.display = 'none';
@@ -1017,7 +1060,6 @@
             document.getElementById('copyOrder').addEventListener('click', copyOrder);
             document.getElementById('backToMenu').addEventListener('click', backToMenu);
 
-            // 關閉肉品選擇彈窗 (點確定後記錄關閉狀態)
             document.getElementById('closeMeatBtn').addEventListener('click', function() {
                 document.getElementById('meatPopup').classList.remove('visible');
                 meatGiftUserClosed = true;
@@ -1027,13 +1069,11 @@
                 meatGiftUserClosed = true;
             });
 
-            // 重新開啟肉品贈品選擇面板按鈕
             document.getElementById('reopenGiftBtn').addEventListener('click', function() {
                 meatGiftUserClosed = false;
                 document.getElementById('meatPopup').classList.add('visible');
             });
 
-            // 監聽全牛肉贈品選項單選鈕
             const giftRadios = document.querySelectorAll('input[name="meatGift"]');
             giftRadios.forEach(radio => {
                 radio.addEventListener('change', function() {
@@ -1100,14 +1140,12 @@
                 const parts = this.value.split('-');
                 const selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
 
-                // 檢查固定週一公休
                 if (selectedDate.getDay() === 1) {
                     alert('不好意思，每週一公休，請選擇其他日期！');
                     selectedDate.setDate(selectedDate.getDate() + 1);
                     this.value = selectedDate.toISOString().split('T')[0];
                 }
 
-                // 檢查臨時店休清單
                 if (offDays.includes(this.value)) {
                     alert('不好意思，當天店家臨時公休，請選擇其他日期！');
                     selectedDate.setDate(selectedDate.getDate() + 1);
@@ -1148,6 +1186,7 @@
                 });
                 document.getElementById('orderForm').reset();
                 meatGiftUserClosed = false;
+                lastSideDishState = "";
                 initDateTime();
                 updateOrderData();
                 hideShareSection();
@@ -1204,7 +1243,6 @@
                 `• ${item.name} × ${item.qty} → NT$${(item.price * item.qty).toLocaleString()}`
             );
 
-            // 自動列出肉片贈品明細
             if (totalResult.meatGifts && totalResult.meatGifts.length > 0) {
                 totalResult.meatGifts.forEach(giftName => {
                     itemsTextList.push(`🎁 贈品：${giftName} × 1 (送${giftName}) → NT$0`);
@@ -1250,10 +1288,22 @@ ${itemsText}
             document.getElementById('shareSection').style.display = 'none';
         }
 
+        // ===== 2. 修正跨平台 LINE 分享連結 (手機/電腦皆相容) =====
         function shareToLine() {
             const orderPreview = document.getElementById('orderPreview').textContent;
             const encodedText = encodeURIComponent(orderPreview);
-            const lineUrl = `https://line.me/R/msg/text/?${encodedText}`;
+            
+            // 判斷是否為行動裝置
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            
+            let lineUrl = "";
+            if (isMobile) {
+                lineUrl = `https://line.me/R/msg/text/?${encodedText}`;
+            } else {
+                // 電腦版 LINE 專用喚起分享視窗語法
+                lineUrl = `https://line.me/R/share?text=${encodedText}`;
+            }
+
             window.open(lineUrl, '_blank');
             alert('訂單已開啟 LINE，請選擇傳送給店家 (@198usxgc) 或其他聯絡人！');
         }
