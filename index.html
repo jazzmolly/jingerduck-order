@@ -438,7 +438,7 @@
             h1 { font-size: 1.5rem; }
         }
 
-        /* 浮動提示區域 */
+        /* 浮動提示區域修正 */
         .promotion-message-popup {
             position: fixed;
             bottom: 20px;
@@ -466,7 +466,9 @@
 
         .gift-options {
             display: flex;
-            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
             margin-top: 10px;
             padding-top: 8px;
             border-top: 1px solid #444;
@@ -479,6 +481,22 @@
             gap: 6px;
             color: #ffeb3b;
             font-weight: bold;
+        }
+
+        .promo-confirm-btn {
+            background: var(--brand);
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        .promo-confirm-btn:hover {
+            background: #a11e1e;
         }
     </style>
 </head>
