@@ -504,9 +504,15 @@
     <div id="promotionMessage" class="promotion-message-popup">
         <div id="promoText"></div>
         <div id="giftOptionContainer" class="gift-options" style="display: none;">
-            <span>請選擇贈品：</span>
-            <label><input type="radio" name="meatGift" value="培根牛" checked> 培根牛</label>
-            <label><input type="radio" name="meatGift" value="梅花豬"> 梅花豬</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span>贈品：</span>
+                <label><input type="radio" name="meatGift" value="培根牛" checked> 培根牛</label>
+                <label><input type="radio" name="meatGift" value="梅花豬"> 梅花豬</label>
+            </div>
+            <button type="button" class="promo-confirm-btn" id="closePromoBtn">確定</button>
+        </div>
+        <div id="simpleCloseContainer" style="text-align: right; margin-top: 8px; display: none;">
+            <button type="button" class="promo-confirm-btn" id="closeSimplePromoBtn">確定</button>
         </div>
     </div>
 
