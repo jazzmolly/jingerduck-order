@@ -438,7 +438,7 @@
             h1 { font-size: 1.5rem; }
         }
 
-        /* 浮動提示區域修正 */
+        /* 浮動提示區域 */
         .promotion-message-popup {
             position: fixed;
             bottom: 20px;
@@ -501,6 +501,7 @@
     </style>
 </head>
 <body>
+    <!-- 浮動提示元件 -->
     <div id="promotionMessage" class="promotion-message-popup">
         <div id="promoText"></div>
         <div id="giftOptionContainer" class="gift-options" style="display: none;">
@@ -600,9 +601,13 @@
     </div>
 
     <script>
-        // ===== 臨時店休日期設定區 =====
-        // 若有偶爾臨時想店休的日期，請填入下方陣列中，例如 ["2026-10-04", "2026-10-11"]
+        // ===== 臨時店休日期設定區 (格式："YYYY-MM-DD") =====
         const offDays = [];
+
+        // ===== 全域變數 =====
+        let currentOrderId = null;
+        let selectedMeatGift = "培根牛"; // 全牛肉時預設贈品
+        let promoTimeoutId = null;
 
         // ===== 菜單資料 =====
         const menuData = [
@@ -650,9 +655,9 @@
             }
         ];
 
-        let currentOrderId = null;
-        let selectedMeatGift = "培根牛"; // 全牛肉預設贈品
+        let totalResult = { items: [], total: 0, meatGifts: [] };
 
+        // ===== 網頁初始化 =====
         document.addEventListener('DOMContentLoaded', function() {
             initMenu();
             initDateTime();
@@ -660,6 +665,7 @@
             updateOrderData();
         });
 
+        // ===== 動態渲染菜單表格 =====
         function initMenu() {
             const menuBody = document.getElementById('menuBody');
             menuBody.innerHTML = '';
@@ -706,6 +712,7 @@
             });
         }
 
+        // ===== 菜單品項事件綁定 =====
         function bindItemEvents(itemId) {
             const checkbox = document.getElementById(itemId);
             const qtyContainer = document.querySelector(`[data-qty-id="${itemId}"]`);
@@ -781,8 +788,7 @@
             });
         }
 
-        let totalResult = { items: [], total: 0, meatGifts: [] };
-        
+        // ===== 更新訂單資料狀態 =====
         function updateOrderData() {
             const selectedItems = [];
             
@@ -812,6 +818,7 @@
             updateConfirmButton();
         }
 
+        // ===== 計算金額 =====
         function calculateTotal() {
             let finalTotal = 0;
             let sideDishCount = 0;
@@ -829,8 +836,6 @@
             totalResult.total = finalTotal;
             updateOrderDisplay();
         }
-
-        let promoTimeoutId = null;
 
         // ===== 顯示即時優惠提醒訊息 =====
         function displayPromotionMessage() {
@@ -892,7 +897,6 @@
                 simpleCloseContainer.style.display = showGiftOption ? 'none' : 'block';
                 popup.classList.add('visible');
 
-                // 自動關閉計時器
                 if (promoTimeoutId) clearTimeout(promoTimeoutId);
                 promoTimeoutId = setTimeout(() => {
                     popup.classList.remove('visible');
@@ -964,13 +968,6 @@
                     displayPromotionMessage();
                 });
             });
-
-            const formInputs = document.querySelectorAll('.form-input[required]');
-            formInputs.forEach(input => {
-                input.addEventListener('blur', validateInput);
-                input.addEventListener('input', validateInput);
-            });
-        }
 
             const formInputs = document.querySelectorAll('.form-input[required]');
             formInputs.forEach(input => {
@@ -1057,6 +1054,7 @@
             });
         }
 
+        // ===== 清除訂單 =====
         function clearOrder() {
             if (confirm('確定要清除目前選單嗎？')) {
                 menuData.forEach(category => {
@@ -1083,6 +1081,7 @@
             }
         }
 
+        // ===== 確認訂單 =====
         async function confirmOrder() {
             const form = document.getElementById('orderForm');
             if (!form.checkValidity()) {
@@ -1109,6 +1108,7 @@
             await saveToGoogleSheets(totalResult);
         }
 
+        // ===== 顯示訂單預覽 =====
         function showOrderPreview() {
             const now = new Date();
             const orderTime = now.toLocaleString('zh-TW', {
@@ -1130,7 +1130,7 @@
                 `• ${item.name} × ${item.qty} → NT$${(item.price * item.qty).toLocaleString()}`
             );
 
-            // 若有肉片贈品，自動列出於明細中
+            // 自動列出肉片贈品明細
             if (totalResult.meatGifts && totalResult.meatGifts.length > 0) {
                 totalResult.meatGifts.forEach(giftName => {
                     itemsTextList.push(`🎁 贈品：${giftName} × 1 (送${giftName}) → NT$0`);
@@ -1207,6 +1207,7 @@ ${itemsText}
             document.getElementById('confirmOrder').style.display = 'block';
         }
 
+        // ===== 傳送到 Google Sheets =====
         async function saveToGoogleSheets(totalResult) {
             const scriptUrl = 'https://script.google.com/macros/s/AKfycbwwC6HFuGUo_U_VxRfGgBX1zQbmXAkZUOTe7zul1VQVInZ2ry5-vKM8L4toVdu74F0eaQ/exec';
 
@@ -1216,7 +1217,6 @@ ${itemsText}
             }
 
             try {
-                // 將贈品加入 items 傳給後端備查
                 let sendItems = totalResult.items.map(item => ({
                     ...item,
                     subtotal: item.price * item.qty
