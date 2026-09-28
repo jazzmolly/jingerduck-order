@@ -830,10 +830,14 @@
             updateOrderDisplay();
         }
 
+        let promoTimeoutId = null;
+
+        // ===== 顯示即時優惠提醒訊息 =====
         function displayPromotionMessage() {
             const popup = document.getElementById('promotionMessage');
             const promoText = document.getElementById('promoText');
             const giftContainer = document.getElementById('giftOptionContainer');
+            const simpleCloseContainer = document.getElementById('simpleCloseContainer');
             
             let sideDishCount = 0;
             let beefCount = 0;
@@ -885,17 +889,28 @@
             if (messages.length > 0) {
                 promoText.innerHTML = messages.join('<br>');
                 giftContainer.style.display = showGiftOption ? 'flex' : 'none';
+                simpleCloseContainer.style.display = showGiftOption ? 'none' : 'block';
                 popup.classList.add('visible');
+
+                // 自動關閉計時器
+                if (promoTimeoutId) clearTimeout(promoTimeoutId);
+                promoTimeoutId = setTimeout(() => {
+                    popup.classList.remove('visible');
+                }, 6000);
             } else {
                 popup.classList.remove('visible');
                 giftContainer.style.display = 'none';
+                simpleCloseContainer.style.display = 'none';
+                if (promoTimeoutId) clearTimeout(promoTimeoutId);
             }
         }
 
+        // ===== 更新金額顯示 =====
         function updateOrderDisplay() {
             document.getElementById('totalAmount').textContent = `NT$${totalResult.total.toLocaleString()}`;
         }
 
+        // ===== 更新確認按鈕狀態 =====
         function updateConfirmButton() {
             const form = document.getElementById('orderForm');
             const isFormValid = form.checkValidity();
@@ -903,6 +918,7 @@
             document.getElementById('confirmOrder').disabled = !(hasItems && isFormValid);
         }
 
+        // ===== 輸入欄位驗證 =====
         function validateInput(e) {
             const input = e.target;
             const isValid = input.checkValidity();
@@ -924,12 +940,21 @@
             updateConfirmButton();
         }
 
+        // ===== 事件監聽綁定 =====
         function initEventListeners() {
             document.getElementById('clearOrder').addEventListener('click', clearOrder);
             document.getElementById('confirmOrder').addEventListener('click', confirmOrder);
             document.getElementById('shareToLine').addEventListener('click', shareToLine);
             document.getElementById('copyOrder').addEventListener('click', copyOrder);
             document.getElementById('backToMenu').addEventListener('click', backToMenu);
+
+            // 關閉浮動提示按鈕事件
+            document.getElementById('closePromoBtn').addEventListener('click', function() {
+                document.getElementById('promotionMessage').classList.remove('visible');
+            });
+            document.getElementById('closeSimplePromoBtn').addEventListener('click', function() {
+                document.getElementById('promotionMessage').classList.remove('visible');
+            });
 
             // 監聽全牛肉贈品選項按鈕
             const giftRadios = document.querySelectorAll('input[name="meatGift"]');
@@ -939,6 +964,13 @@
                     displayPromotionMessage();
                 });
             });
+
+            const formInputs = document.querySelectorAll('.form-input[required]');
+            formInputs.forEach(input => {
+                input.addEventListener('blur', validateInput);
+                input.addEventListener('input', validateInput);
+            });
+        }
 
             const formInputs = document.querySelectorAll('.form-input[required]');
             formInputs.forEach(input => {
